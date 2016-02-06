@@ -63,6 +63,14 @@ namespace DoremiEditor
 			(added/removed). It should be possible to combine these two
 			*/
 			static void cb_parentChanges(MDagPath& child, MDagPath& parent, void* clientData);
+			/**
+			AFFECTS: Transforms, Meshes, Lights, Cameras
+			Parent changes callback
+			TODOJW : Analyze functions from original project as there are two different almost identical functions
+			(added/removed). It should be possible to combine these two
+			*/
+			static void cb_parentChange(MDagMessage::DagMessage p_msgType, MDagPath &p_child, MDagPath &p_parent, void *p_clientData);
+
 
 			/**
 			AFFECTS: Meshes
@@ -118,6 +126,9 @@ namespace DoremiEditor
 			*/
 			static void cb_materialAttributeChanges(MNodeMessage::AttributeMessage msg, MPlug& plug_1, MPlug& plug_2, void* clientData);
 
+
+
+			
 
 			static void AddTransform(MObject& p_node);
 			static void AddMesh(MObject& p_node, bool p_isNew);
