@@ -27,5 +27,10 @@ namespace DoremiEditor
 
 			}
 		}
+		MString GetNameStrings(const std::string p_name1, const std::string p_name2) 
+		{
+			MString str = (" ( " + MString(p_name1.c_str()) + " ) -> ( " + MString(p_name2.c_str()) + " ) ");
+			return str;
+		}
 	}
 }

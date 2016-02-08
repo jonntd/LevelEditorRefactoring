@@ -8,6 +8,7 @@ namespace DoremiEditor
 	namespace Plugin
 	{
 		class MessageHandler;
+		class MessageBuilder;
 		class NodeHandler
 		{
 		private:
@@ -28,6 +29,8 @@ namespace DoremiEditor
 			bool m_testBool;
 		public:
 			MessageHandler* m_messageHandler =nullptr;
+			MessageBuilder* m_messageBuilder = nullptr;
+
 			NodeHandler();
 			~NodeHandler();
 			
@@ -48,6 +51,7 @@ namespace DoremiEditor
 			void NodeDeletedCamera(const std::string p_nodeName);
 			void NodeDeletedLight(const std::string p_nodeName);
 			void NodeDeletedMaterial(const std::string p_nodeName);
+			void ChangeParentName(MFnTransform& p_transform, const std::string p_oldName);
 			void PrintVectorInfo();
 				
 

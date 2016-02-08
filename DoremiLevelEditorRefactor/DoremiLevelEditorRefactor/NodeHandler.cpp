@@ -1,6 +1,7 @@
 #include "NodeHandler.hpp"
 #include "ApplicationContext.hpp"
 #include "MessageHandler.hpp"
+#include "MessageBuilder.hpp"
 namespace DoremiEditor
 {
 	namespace Plugin
@@ -22,7 +23,8 @@ namespace DoremiEditor
 		}
 		NodeHandler::~NodeHandler()
 		{
-
+			m_messageHandler = ApplicationContext::GetInstance().GetMessageHandler();
+			m_messageBuilder = ApplicationContext::GetInstance().GetMessageBuilder();
 		}
 
 		void NodeHandler::AddCustomAttributesTransform(MFnTransform& p_transform)
@@ -67,7 +69,6 @@ namespace DoremiEditor
 				PrintError(MString() + errorMessage.c_str());
 			}	
 		}
-
 		void NodeHandler::PrintVectorInfo()
 		{
 			int totalCount, transformCount, meshCount, camCount, lightCount, materialCount;
@@ -108,6 +109,7 @@ namespace DoremiEditor
 				if (m_transformVector.size() == 0)
 				{
 					m_transformVector.push_back(transformInfo);
+					m_messageBuilder->GetTransformData(transformName);
 				}
 				// Otherwise loop through vector to prevent duplicates
 				else
@@ -129,6 +131,7 @@ namespace DoremiEditor
 					{
 						// Add node to vector
 						m_transformVector.push_back(transformInfo);
+						m_messageBuilder->GetTransformData(transformName);
 						PrintDebug("Added transform ( " + MString(transformName.c_str()) + " ) with parent ( " + MString(parentName.c_str()) + " )");
 					}
 					else
@@ -180,6 +183,7 @@ namespace DoremiEditor
 				if (m_meshVector.size() == 0)
 				{
 					m_meshVector.push_back(meshInfo);
+					m_messageBuilder->GetMeshData(meshName);
 					PrintDebug("Added mesh ( " + MString(meshName.c_str()) + " ) with parent ( " + MString(meshInfo.transformName.at(0).c_str()) + " )");
 				}
 				else
@@ -196,6 +200,7 @@ namespace DoremiEditor
 					if (!nodeExists)
 					{
 						m_meshVector.push_back(meshInfo);
+						m_messageBuilder->GetMeshData(meshName);
 						PrintDebug("Added mesh ( " + MString(meshName.c_str()) + " ) with parent ( " + MString(meshInfo.transformName.at(0).c_str()) + " )");
 					}
 					else
@@ -277,6 +282,221 @@ namespace DoremiEditor
 				PrintError(MString() + errorMessage.c_str());
 			}
 		}
+		
+		void NodeHandler::ChangeParentName(MFnTransform& p_transform, const std::string p_oldName)
+		{
+			try
+			{
+				MStatus result;
+				std::string t_newParentName = p_transform.name().asChar();
+				PrintError("KOMMMER VI HIT? " + MString() + p_transform.childCount());
+				for (size_t t = 0; t < p_transform.childCount(); ++t)
+				{
+					if (p_transform.child(t).hasFn(MFn::kTransform))
+					{
+						MFnTransform t_transform(p_transform.child(t), &result);
+						
+						for (std::vector<TransformInfo>::size_type i; i < m_transformVector.size(); ++i)
+						{
+							if (strcmp(p_oldName.c_str(), m_transformVector.at(i).parentName.c_str()) == 0)
+							{
+								PrintDebug("Changed parent name for " + t_transform.name() + " ( " + GetNameStrings(p_oldName, t_newParentName) + " )");
+								m_transformVector.at(i).parentName = t_newParentName;
+							}
+						}
+					}
+					else if (p_transform.child(t).hasFn(MFn::kMesh))
+					{
+						MFnMesh t_mesh(p_transform.child(t), &result);
+						//PrintError("1111111111111111111111111");
+						for (std::vector<MeshInfo>::size_type i; i < m_meshVector.size(); ++i)
+						{
+							PrintError("1111111111111111111111111");
+							for (std::vector<std::string>::size_type o; o < m_meshVector.at(i).transformName.size(); ++o)
+							{
+								PrintError("222222222222222222222222");
+								/*if (strcmp(p_oldName.c_str(), m_meshVector.at(i).transformName.at(o).c_str()) == 0)
+								{
+									PrintDebug("Changed parent name for " + t_mesh.name() + " ( " + GetNameStrings(p_oldName, t_newParentName) + " )");
+									m_meshVector.at(i).transformName.at(o) = t_newParentName;
+								}*/
+							}
+							/*if (strcmp(p_oldName.c_str(), m_transformVector.at(i).parentName.c_str()) == 0)
+							{
+								PrintDebug("Changed parent name for " + t_mesh.name() + " ( " + GetNameStrings(p_oldName, t_newParentName) + " )");
+								m_transformVector.at(i).parentName = t_newParentName;
+							}*/
+						}
+					}
+					else if (p_transform.child(t).hasFn(MFn::kCamera))
+					{
+						MFnCamera t_camera(p_transform.child(t), &result);
+
+						for (std::vector<CameraInfo>::size_type i; i < m_cameraVector.size(); ++i)
+						{
+							if (strcmp(p_oldName.c_str(), m_cameraVector.at(i).transformName.c_str()) == 0)
+							{
+								PrintDebug("Changed parent name for " + t_camera.name() + " ( " + GetNameStrings(p_oldName, t_newParentName) + " )");
+								m_cameraVector.at(i).transformName = t_newParentName;
+							}
+						}
+					}
+					else if (p_transform.child(t).hasFn(MFn::kLight))
+					{
+						MFnLight t_light(p_transform.child(t), &result);
+
+						for (std::vector<LightInfo>::size_type i; i < m_lightVector.size(); ++i)
+						{
+							if (strcmp(p_oldName.c_str(), m_lightVector.at(i).transformName.c_str()) == 0)
+							{
+								PrintDebug("Changed parent name for " + t_light.name() + " ( " + GetNameStrings(p_oldName, t_newParentName) + " )");
+								m_lightVector.at(i).transformName = t_newParentName;
+							}
+						}
+					}
+
+				}
+			}
+			catch (...)
+			{
+				const std::string errorMessage = std::string("Cath: " + std::string(__FUNCTION__));
+				PrintError(MString() + errorMessage.c_str());
+			}
+		}
+		void NodeHandler::NodeNameChangeTransform(MFnTransform& p_transform, const std::string p_oldName)
+		{
+			try
+			{
+				MStatus result;
+				std::string t_oldName = p_oldName;
+				std::string t_newName = p_transform.name().asChar();
+				for (std::vector<TransformInfo>::size_type i = 0; i < m_transformVector.size(); ++i)
+				{
+					if (strcmp(p_oldName.c_str(), m_transformVector.at(i).nodeName.c_str()) == 0)
+					{
+						m_transformVector.at(i).nodeName = t_newName;
+						//ChangeParentName(p_transform, t_oldName);
+						PrintInfo("Transform name changed in vector" + GetNameStrings(p_oldName, m_transformVector.at(i).nodeName));
+					}
+				}
+			}
+			catch (...)
+			{
+				const std::string errorMessage = std::string("Cath: " + std::string(__FUNCTION__));
+				PrintError(MString() + errorMessage.c_str());
+			}
+		}
+		void NodeHandler::NodeNameChangeMesh(MFnMesh& p_mesh, const std::string p_oldName) 
+		{
+			try
+			{
+				MStatus result;
+				PrintInfo("Trans");
+				std::string t_newName = p_mesh.name().asChar();
+				for (std::vector<MeshInfo>::size_type i = 0; i < m_meshVector.size(); ++i)
+				{
+					if (strcmp(p_oldName.c_str(), m_meshVector.at(i).nodeName.c_str()) == 0)
+					{
+						m_meshVector.at(i).nodeName = t_newName;
+						PrintInfo("Mesh name changed in vector" + GetNameStrings(p_oldName, m_meshVector.at(i).nodeName));
+					}
+				}
+			}
+			catch (...)
+			{
+				const std::string errorMessage = std::string("Cath: " + std::string(__FUNCTION__));
+				PrintError(MString() + errorMessage.c_str());
+			}
+		}
+		void NodeHandler::NodeNameChangeCamera(MFnCamera& p_camera, const std::string p_oldName) 
+		{
+			try
+			{
+				MStatus result;
+				PrintInfo("Trans");
+				std::string t_newName = p_camera.name().asChar();
+				for (std::vector<CameraInfo>::size_type i = 0; i < m_cameraVector.size(); ++i)
+				{
+					if (strcmp(p_oldName.c_str(), m_cameraVector.at(i).nodeName.c_str()) == 0)
+					{
+						m_cameraVector.at(i).nodeName = t_newName;
+						PrintInfo("Camera name changed in vector" + GetNameStrings(p_oldName, m_cameraVector.at(i).nodeName));
+					}
+				}
+			}
+			catch (...)
+			{
+				const std::string errorMessage = std::string("Cath: " + std::string(__FUNCTION__));
+				PrintError(MString() + errorMessage.c_str());
+			}
+
+		}
+		void NodeHandler::NodeNameChangeLight(MFnLight& p_light, const std::string p_oldName) 
+		{
+			try
+			{
+				MStatus result;
+				PrintInfo("Trans");
+				std::string t_newName = p_light.name().asChar();
+				for (std::vector<LightInfo>::size_type i = 0; i < m_lightVector.size(); ++i)
+				{
+					if (strcmp(p_oldName.c_str(), m_lightVector.at(i).nodeName.c_str()) == 0)
+					{
+						m_lightVector.at(i).nodeName = t_newName;
+						PrintInfo("Light name changed in vector" + GetNameStrings(p_oldName, m_lightVector.at(i).nodeName));
+					}
+				}
+			}
+			catch (...)
+			{
+				const std::string errorMessage = std::string("Cath: " + std::string(__FUNCTION__));
+				PrintError(MString() + errorMessage.c_str());
+			}
+		}
+		void NodeHandler::NodeNameChangeMaterial(MFnDependencyNode& p_material, const std::string p_oldName) 
+		{
+			try
+			{
+				MStatus result;
+				PrintInfo("Trans");
+				std::string t_newName = p_material.name().asChar();
+				for (std::vector<MaterialInfo>::size_type i = 0; i < m_materialVector.size(); ++i)
+				{
+					if (strcmp(p_oldName.c_str(), m_materialVector.at(i).nodeName.c_str()) == 0)
+					{
+						m_materialVector.at(i).nodeName = t_newName;
+						PrintInfo("Material name changed in vector" + GetNameStrings(p_oldName, m_materialVector.at(i).nodeName));
+					}
+				}
+			}
+			catch (...)
+			{
+				const std::string errorMessage = std::string("Cath: " + std::string(__FUNCTION__));
+				PrintError(MString() + errorMessage.c_str());
+			}
+		}
+		void NodeHandler::NodeDeletedTransform(const std::string p_nodeName)
+		{
+
+		}
+		void NodeHandler::NodeDeletedMesh(const std::string p_nodeName)
+		{
+
+		}
+		void NodeHandler::NodeDeletedCamera(const std::string p_nodeName) 
+		{
+
+		}
+		void NodeHandler::NodeDeletedLight(const std::string p_nodeName) 
+		{
+
+		}
+		void NodeHandler::NodeDeletedMaterial(const std::string p_nodeName) 
+		{
+
+		}
+		
+
 
 	}
 }

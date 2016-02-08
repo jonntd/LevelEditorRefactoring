@@ -10,6 +10,7 @@ namespace DoremiEditor
 		class NodeHandler;
 		class MessageHandler;
 		class CallbackHandler;
+		class MessageBuilder;
 		class ApplicationContext
 		{
 		public:
@@ -33,6 +34,10 @@ namespace DoremiEditor
 			{
 				return m_callbackHandler;
 			}
+			MessageBuilder* GetMessageBuilder() const
+			{
+				return m_messageBuilder;
+			}
 			bool GetDebugStatus()
 			{
 				return m_debugMode;
@@ -46,6 +51,7 @@ namespace DoremiEditor
 			NodeHandler* m_nodeHandler = nullptr;
 			MessageHandler* m_messageHandler = nullptr;
 			CallbackHandler* m_callbackHandler = nullptr;
+			MessageBuilder* m_messageBuilder = nullptr;
 			ApplicationContext();
 			~ApplicationContext();
 			ApplicationContext(ApplicationContext const&) = delete;

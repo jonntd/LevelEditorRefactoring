@@ -110,6 +110,7 @@ namespace DoremiEditor
 					}
 					else
 					{
+						m_callbackIDArray.append(MNodeMessage::addNameChangedCallback(p_node, cb_nameChange));
 						// If the transform has no children, there is at the moment no need to add this node 
 					}
 				}
@@ -164,7 +165,56 @@ namespace DoremiEditor
 		{
 			try
 			{
+				MStatus result;
+				
+				std::string t_oldName = p_str.asChar();
+				if (p_node.hasFn(MFn::kTransform))
+				{
+					MFnTransform t_trans(p_node, &result);
+					std::string t_newName = t_trans.name().asChar();
+					if (t_oldName.find("__PrenotatoPerDuplicare") != std::string::npos && t_newName.length() >0)
+					{
+						AddTransform(p_node);
+					}
+					else
+					{
+						s_nodeHandler->NodeNameChangeTransform(t_trans, t_oldName);
+					}
+				}
+				else if (p_node.hasFn(MFn::kMesh))
+				{
+					MFnMesh t_mesh(p_node, &result);
+					std::string t_newName = t_mesh.name().asChar();
+					PrintDebug("Mesh name change ( " + MString(t_oldName.c_str()) + " ) to (" + MString(t_newName.c_str()) + ") ");
+					if (t_oldName.find("__PrenotatoPerDuplicare") != std::string::npos && t_newName.length() >0)
+					{
+						MMessage::removeCallback(MMessage::currentCallbackId());
+						AddMesh(p_node, false);
+					}
+					else
+					{
 
+					}
+				}
+				else if (p_node.hasFn(MFn::kCamera))
+				{
+					MFnCamera t_camera(p_node, &result);
+				}
+				else if (p_node.hasFn(MFn::kLight))
+				{
+					MFnLight t_light(p_node, &result);
+					std::string t_newName = t_light.name().asChar();
+					PrintDebug("Light name change ( " + MString(t_oldName.c_str()) + " ) to (" + MString(t_newName.c_str()) + ") ");
+					if (t_oldName.find("__PrenotatoPerDuplicare") != std::string::npos && t_newName.length() >0)
+					{
+
+						AddLight(p_node, false);
+					}
+				}
+				else if (p_node.hasFn(MFn::kLambert))
+				{
+					MFnDependencyNode t_material(p_node, &result);
+				}
 			}
 			catch (...)
 			{
@@ -449,6 +499,7 @@ namespace DoremiEditor
 			if (result)
 			{
 				s_nodeHandler->AddCustomAttributesTransform(t_transform);
+				m_callbackIDArray.append(MNodeMessage::addNameChangedCallback(p_node, cb_nameChange));
 				m_callbackIDArray.append(MNodeMessage::addAttributeChangedCallback(p_node, cb_transformAttributeChange));
 				m_callbackIDArray.append(MNodeMessage::addNodePreRemovalCallback(p_node, cb_preRemoveNode));
 				s_nodeHandler->AddTransformNode(t_transform);
@@ -463,28 +514,35 @@ namespace DoremiEditor
 		{
 			MStatus result;
 			MFnMesh t_mesh(p_node, &result);
-
-			// Set quadsplit to left. Ensures that the internal triangulation works properly.
-			MString myCommand = "setAttr -e " + t_mesh.name() + ".quadSplit 0";
-			MGlobal::executeCommandOnIdle(myCommand);
-			// Add Callbacks
-			m_callbackIDArray.append(MPolyMessage::addPolyTopologyChangedCallback(p_node, cb_meshPolyChange));
-			m_callbackIDArray.append(MNodeMessage::addNodePreRemovalCallback(p_node, cb_preRemoveNode));
-			if (result)
+			std::string t_nodeName = t_mesh.name().asChar();
+			if (t_nodeName.find("__PrenotatoPerDuplicare") != std::string::npos)
 			{
-				m_callbackIDArray.append(MNodeMessage::addAttributeChangedCallback(p_node, cb_meshAttributeChange));
-				s_nodeHandler->AddMeshNode(t_mesh);
-				// TODOJW: Investigate and add duplicate/instancing callbacks.
-			}
-			else if (p_isNew)
-			{
-					m_callbackIDArray.append(MNodeMessage::addAttributeChangedCallback(p_node, cb_meshEvaluate));
+				m_callbackIDArray.append(MNodeMessage::addNameChangedCallback(p_node, cb_nameChange));
 			}
 			else
 			{
-				PrintError("Could not create MFnMesh from node: " + MString(p_node.apiTypeStr()));
+				// Add Callbacks
+				m_callbackIDArray.append(MNodeMessage::addNameChangedCallback(p_node, cb_nameChange));
+				m_callbackIDArray.append(MPolyMessage::addPolyTopologyChangedCallback(p_node, cb_meshPolyChange));
+				m_callbackIDArray.append(MNodeMessage::addNodePreRemovalCallback(p_node, cb_preRemoveNode));
+				if (p_isNew)
+				{
+					m_callbackIDArray.append(MNodeMessage::addAttributeChangedCallback(p_node, cb_meshEvaluate));
+				}
+				if (result)
+				{
+					// Set quadsplit to left. Ensures that the internal triangulation works properly.
+					MString myCommand = "setAttr -e " + t_mesh.name() + ".quadSplit 0";
+					MGlobal::executeCommandOnIdle(myCommand);
+					m_callbackIDArray.append(MNodeMessage::addAttributeChangedCallback(p_node, cb_meshAttributeChange));
+					s_nodeHandler->AddMeshNode(t_mesh);
+					// TODOJW: Investigate and add duplicate/instancing callbacks.
+				}
+				else
+				{
+					PrintError("Could not create MFnMesh from node: " + MString(p_node.apiTypeStr()));
+				}
 			}
-
 		}
 		void CallbackHandler::AddCamera(MObject& p_node)
 		{
@@ -514,7 +572,12 @@ namespace DoremiEditor
 			{
 				MStatus result;
 				MFnLight t_light(p_node, &result);
-				if (result)
+				std::string t_nodeName = t_light.name().asChar();
+				if (t_nodeName.find("__PrenotatoPerDuplicare") != std::string::npos)
+				{
+					m_callbackIDArray.append(MNodeMessage::addNameChangedCallback(p_node, cb_nameChange));
+				}
+				else if (result)
 				{
 					if (p_node.hasFn(MFn::kDirectionalLight) || p_node.hasFn(MFn::kSpotLight) || p_node.hasFn(MFn::kPointLight))
 					{
