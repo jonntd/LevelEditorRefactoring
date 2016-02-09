@@ -615,6 +615,7 @@ namespace DoremiEditor
 				m_callbackIDArray.append(MNodeMessage::addAttributeChangedCallback(p_node, cb_materialAttributeChanges));
 				m_callbackIDArray.append(MNodeMessage::addNodePreRemovalCallback(p_node, cb_preRemoveNode));
 				m_callbackIDArray.append(MNodeMessage::addNameChangedCallback(p_node, cb_nameChange));
+				s_nodeHandler->AddMaterialNode(t_material);
 				PrintDebug(t_material.name() + " material found");
 			}
 			catch (...)

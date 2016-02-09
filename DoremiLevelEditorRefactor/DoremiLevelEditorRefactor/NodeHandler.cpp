@@ -155,7 +155,6 @@ namespace DoremiEditor
 				std::vector<std::string> parentNames;
 				MeshInfo meshInfo;
 				meshInfo.nodeName = meshName;
-				PrintDebug("111111");
 				if (p_mesh.parentCount() > 1)
 				{
 					for (int i = 0; i < p_mesh.parentCount(); ++i)
@@ -232,7 +231,34 @@ namespace DoremiEditor
 		{
 			try
 			{
+				MaterialInfo t_materialInfo;
+				t_materialInfo.nodeName = p_material.name().asChar();
+				if (m_materialVector.size() == 0)
+				{
+					m_materialVector.push_back(t_materialInfo);
+					PrintDebug("Added material: " + p_material.name());
+				}
+				else
+				{
+					bool nodeExists = false;
+					for (std::vector<MaterialInfo>::size_type i = 0; i < m_materialVector.size(); ++i)
+					{
+						if (strcmp(t_materialInfo.nodeName.c_str(), m_materialVector.at(i).nodeName.c_str()) == 0)
+						{
+							nodeExists = true;
+							break;
+						}
+					}
+					if (nodeExists)
+					{
 
+					}
+					else
+					{
+						m_materialVector.push_back(t_materialInfo);
+						m_messageBuilder->GetMaterialData(t_materialInfo.nodeName);
+					}
+				}
 			}
 			catch (...)
 			{
@@ -249,6 +275,7 @@ namespace DoremiEditor
 				lightInfo.nodeName = lightName;
 				if (m_lightVector.size() == 0)
 				{
+					m_messageBuilder->GetLightData(lightInfo.nodeName);
 					m_lightVector.push_back(lightInfo);
 					PrintDebug("Added light ( " + MString(lightName.c_str()) + " )");
 				}
@@ -266,6 +293,7 @@ namespace DoremiEditor
 					if (!nodeExists)
 					{
 						m_lightVector.push_back(lightInfo);
+						m_messageBuilder->GetLightData(lightInfo.nodeName);
 						PrintDebug("Added light ( " + MString(lightName.c_str()) + " )");
 					}
 					else
@@ -376,7 +404,7 @@ namespace DoremiEditor
 					{
 						m_transformVector.at(i).nodeName = t_newName;
 						//ChangeParentName(p_transform, t_oldName);
-						PrintInfo("Transform name changed in vector" + GetNameStrings(p_oldName, m_transformVector.at(i).nodeName));
+						PrintDebug("Transform name changed in vector" + GetNameStrings(p_oldName, m_transformVector.at(i).nodeName));
 					}
 				}
 			}

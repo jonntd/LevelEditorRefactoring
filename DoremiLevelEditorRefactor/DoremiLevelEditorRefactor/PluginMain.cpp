@@ -26,9 +26,9 @@ EXPORT MStatus initializePlugin(MObject obj)
 		// if res == kSuccess then the plugin has been loaded,
 		// otherwise is has not.
 	//	DoremiEditor::Plugin::ApplicationContext::GetInstance().GetNodeHandler()->TestFunction();
-		DoremiEditor::Plugin::ApplicationContext::GetInstance().GetMessageHandler()->printAThing();
+		//DoremiEditor::Plugin::ApplicationContext::GetInstance().GetMessageHandler()->printAThing();
 		DoremiEditor::Plugin::ApplicationContext::GetInstance().GetCallbackHandler()->LoadScene();
-		myPlugin.registerCommand("drmTest", DoremiEditor::Plugin::Commands::CmdFileMapToggle::creator);
+		myPlugin.registerCommand("drmToggleFilemaps", DoremiEditor::Plugin::Commands::CmdFileMapToggle::creator);
 		//nhandle->TestFunction();
 	}
 	catch (...)

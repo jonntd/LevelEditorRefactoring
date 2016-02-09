@@ -1,6 +1,6 @@
 #include "CmdFileMapToggle.hpp"
 #include "ApplicationContext.hpp"
-#include "NodeHandler.hpp"
+#include "MessageHandler.hpp"
 namespace DoremiEditor
 {
 	namespace Plugin
@@ -17,7 +17,7 @@ namespace DoremiEditor
 			}
 			MStatus CmdFileMapToggle::doIt(const MArgList& args)
 			{
-				//ApplicationContext::GetInstance().GetNodeHandler()->TestFunction();
+				ApplicationContext::GetInstance().GetMessageHandler()->PrintVectorInfo(true);
 				return MS::kSuccess;
 			}
 			void* CmdFileMapToggle::creator()

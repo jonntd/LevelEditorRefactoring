@@ -8,7 +8,7 @@ namespace DoremiEditor
 	{
 		namespace Commands
 		{
-			class NodeHandler;
+			class MessageHandler;
 			class CmdFileMapToggle : public MPxCommand
 			{
 			public:

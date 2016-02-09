@@ -8,6 +8,7 @@ namespace DoremiEditor
 {
 	namespace Plugin
 	{
+		const int MAX_NAME_SIZE = 100;
 		enum class MessageType : int
 		{
 			msgAdded = 1,
@@ -58,8 +59,8 @@ namespace DoremiEditor
 		struct MessageInfo
 		{
 			std::string nodeName;
-			int nodeType;
-			int msgType;
+			NodeType nodeType;
+			MessageType msgType;
 			std::string oldName;
 		};
 		struct RenameDeleteInfo
@@ -207,16 +208,22 @@ namespace DoremiEditor
 		struct MaterialInfo
 		{
 			std::string nodeName;
-			char diffuseTexturePath[100];
+			std::string diffuseTexturePath;
+			std::string glowTexturePath;
+			std::string specTexturePath;
+			std::string bumpTexturePath;
 			int type;
-			MaterialData matData;
+			MaterialData data;
 		};
 		struct MaterialMessage
 		{
-			char nodeName[100];
-			char diffuseTexturePath[100];
+			char nodeName[MAX_NAME_SIZE];
+			char diffuseTexturePath[MAX_NAME_SIZE];
+			char glowTexturePath[MAX_NAME_SIZE];
+			char specTexturePath[MAX_NAME_SIZE];
+			char bumpTexturePath[MAX_NAME_SIZE];
 			int type;
-			MaterialData matData;
+			MaterialData data;
 		};
 		struct LightData
 		{

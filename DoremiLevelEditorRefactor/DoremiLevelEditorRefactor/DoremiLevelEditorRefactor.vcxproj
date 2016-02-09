@@ -161,6 +161,7 @@
     <ClInclude Include="ApplicationContext.hpp" />
     <ClInclude Include="CallbackHandler.hpp" />
     <ClInclude Include="CmdFileMapToggle.hpp" />
+    <ClInclude Include="Filemapping.hpp" />
     <ClInclude Include="Includes.hpp" />
     <ClInclude Include="MessageBuilder.hpp" />
     <ClInclude Include="MessageHandler.hpp" />
@@ -173,6 +174,7 @@
     <ClCompile Include="ApplicationContext.cpp" />
     <ClCompile Include="CallbackHandler.cpp" />
     <ClCompile Include="CmdFileMapToggle.cpp" />
+    <ClCompile Include="Filemapping.cpp" />
     <ClCompile Include="MessageBuilder.cpp" />
     <ClCompile Include="MessageHandler.cpp" />
     <ClCompile Include="NodeHandler.cpp" />

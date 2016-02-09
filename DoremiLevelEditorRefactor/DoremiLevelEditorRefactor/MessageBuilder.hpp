@@ -15,6 +15,12 @@ namespace DoremiEditor
 			CameraInfo GetCameraData(std::string p_nodeName);
 			LightInfo GetLightData(std::string p_nodeName);
 			MaterialInfo GetMaterialData(std::string p_nodeName);
+			size_t GetMeshDataSize(std::string p_nodeName);
+			size_t GetTransformDataSize();
+			size_t GetCameraDataSize();
+			size_t GetLightDataSize();
+			size_t GetMaterialDataSize();
+
 			
 		};
 	}

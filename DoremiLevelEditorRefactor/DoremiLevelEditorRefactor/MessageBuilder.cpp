@@ -267,9 +267,20 @@ namespace DoremiEditor
 						//
 						std::string t_materialName;
 						MObjectArray t_connectedShaders;
-						MIntArray t_shaderIDs;
-						t_mesh.getConnectedShaders(0, t_connectedShaders, t_shaderIDs);
-						MFnDependencyNode t_shaderGroup(t_connectedShaders[0]);
+						MIntArray t_shaderIDArray;
+						t_mesh.getConnectedShaders(0, t_connectedShaders, t_shaderIDArray);
+						size_t t_connectionID;
+						for (size_t i = 0; i < t_connectedShaders.length(); ++i)
+						{
+							MFnDependencyNode t_shaderGroupTemp(t_connectedShaders[i],&result);
+							MPlug t_plug_2 = t_shaderGroupTemp.findPlug("surfaceShader", &result);
+							if (result)
+							{
+								t_connectionID = i;
+								break;
+							}
+						}
+						MFnDependencyNode t_shaderGroup(t_connectedShaders[t_connectionID], &result);
 						MPlug t_plug = t_shaderGroup.findPlug("surfaceShader");
 						MPlugArray t_connections;
 						t_plug.connectedTo(t_connections, true, false);
@@ -550,15 +561,105 @@ namespace DoremiEditor
 								t_plug = t_texture.findPlug("fileTextureName", &result);
 								if (result)
 								{
+									MString t_texPath = t_plug.asString();
+									if (t_texPath.length() < 1)
+									{
+										PrintWarning(t_material.name() + " Texture path not set!");
+										o_data.diffuseTexturePath[0] = 0;
+									}
+									else if (t_texPath.length() < 100)
+									{
+										o_data.diffuseTexturePath = t_texPath.asChar();
+										PrintInfo(t_material.name() + " texture path: " + t_texPath);
+										o_data.data.mapMasks |= (int)bitmask::COLORMAP;
+									}
+								}
+							}
+						}
+						else
+						{
+							o_data.diffuseTexturePath[0] = 0;
+							t_plug = t_material.findPlug("colorR", &result);
+							t_plug.getValue(o_data.data.color[0]);
+							t_plug = t_material.findPlug("colorG", &result);
+							t_plug.getValue(o_data.data.color[1]);
+							t_plug = t_material.findPlug("colorB", &result);
+							t_plug.getValue(o_data.data.color[2]);
+						}
 
+					}
+					t_plug = t_material.findPlug("incandescence", &result);
+					if (result)
+					{
+						if (t_plug.isConnected())
+						{
+							MPlugArray t_plgArray;
+							t_plug.connectedTo(t_plgArray, true, false);
+							for (int i = 0; i < t_plgArray.length(); ++i)
+							{
+								if (t_plgArray[i].node().apiType() == MFn::kFileTexture)
+								{
+									MFnDependencyNode glowTexture(t_plgArray[i].node());
+									t_plug = glowTexture.findPlug("fileTextureName", &result);
+									MString name = t_plug.asString();
+									if (name.length() < 1)
+									{
+										PrintWarning(t_material.name() + " Glow path not set!");
+										o_data.glowTexturePath[0] = 0;
+									}
+									else if (name.length() < 100)
+									{
+										PrintDebug(t_material.name() + " FOUND GLOW MAP " + name);
+										o_data.glowTexturePath = name.asChar();
+
+										o_data.data.mapMasks |= (int)bitmask::GLOWMAP;
+									}
+									else
+									{
+										PrintWarning(t_material.name() + "Glow texture path name too long");
+									}
 								}
 							}
 						}
 					}
-					
+					t_plug = t_material.findPlug("specularColor", &result);
+					if (result)
+					{
+						if (t_plug.isConnected())
+						{
+							PrintDebug("IS CONNECTED");
+						}
+						else
+						{
+							t_plug = t_material.findPlug("specularColorR", &result);
+							if (result) t_plug.getValue(o_data.data.specColor[0]);
+							t_plug = t_material.findPlug("specularColorG", &result);
+							if (result) t_plug.getValue(o_data.data.specColor[1]);
+							t_plug = t_material.findPlug("specularColorB", &result);
+							if (result) t_plug.getValue(o_data.data.specColor[2]);
+						}
+					}
+					t_plug = t_material.findPlug("cosinePower", &result);
+					if (result)
+					{
+						t_plug.getValue(o_data.data.specCosine);
+					}
+					t_plug = t_material.findPlug("eccentricity", &result);
+					if (result)
+					{
+						t_plug.getValue(o_data.data.specEccentricity);
+					}
+					t_plug = t_material.findPlug("specularRollOff", &result);
+					if (result)
+					{
+						t_plug.getValue(o_data.data.specRollOff);
+					}
 
-
-
+						PrintDebug(t_material.name()+ " Color: " + MString() + o_data.data.color[0]);
+						PrintDebug(t_material.name()+ " Specular color: ");
+						PrintDebug(t_material.name()+ " Cosine Power: " + MString() + o_data.data.specCosine);
+						PrintDebug(t_material.name()+ " Eccentricity: " + MString() + o_data.data.specEccentricity);
+						PrintDebug(t_material.name()+ " Specular Roll Off: " + MString() + o_data.data.specRollOff);
 				}
 				return o_data;
 			}
@@ -568,6 +669,105 @@ namespace DoremiEditor
 				PrintError(MString() + errorMessage.c_str());
 			}
 
+		}
+
+		size_t MessageBuilder::GetMeshDataSize(std::string p_nodeName)
+		{
+			try
+			{
+				MStatus result;
+				MeshInfo o_mesh;
+
+				MString t_nodeNameMString(p_nodeName.c_str());
+				MSelectionList t_selectionList;
+				MDagPath t_dagPath;
+
+				if (MGlobal::getSelectionListByName(t_nodeNameMString, t_selectionList))
+				{
+					t_selectionList.getDagPath(0, t_dagPath);
+					if (t_dagPath.hasFn(MFn::kMesh))
+					{
+						MFnMesh t_mesh(t_dagPath, &result);
+
+						MIntArray t_trianglePerPolyCount;
+						MIntArray t_triangleVertexIDs;
+						t_mesh.getTriangles(t_trianglePerPolyCount, t_triangleVertexIDs);
+
+						o_mesh.transformCount = t_mesh.parentCount();
+						o_mesh.meshData.vertCount = t_mesh.numVertices();
+						o_mesh.meshData.normalCount = t_mesh.numNormals();
+						o_mesh.meshData.UVCount = t_mesh.numUVs();
+						o_mesh.meshData.indCount = t_triangleVertexIDs.length();
+						o_mesh.meshData.triCount = t_trianglePerPolyCount.length();
+
+						size_t t_messageSize = 0;
+						t_messageSize += sizeof(char) * 100;
+						t_messageSize += (sizeof(char) * 100)*static_cast<int>(o_mesh.transformCount);
+						t_messageSize += sizeof(char) * 100;
+						t_messageSize += sizeof(int) * 8;
+						t_messageSize += (sizeof(float) * 3) * o_mesh.meshData.vertCount;
+						t_messageSize += (sizeof(float) * 3) * o_mesh.meshData.normalCount;
+						t_messageSize += (sizeof(float) * 2) * o_mesh.meshData.UVCount;
+						t_messageSize += (sizeof(int) * 3) * o_mesh.meshData.indCount;
+						t_messageSize += sizeof(int) * o_mesh.meshData.triCount;
+						return t_messageSize;
+					}
+				}
+
+			}
+			catch (...)
+			{
+				const std::string errorMessage = std::string("Catch: " + std::string(__FUNCTION__));
+				PrintError(MString() + errorMessage.c_str());
+			}
+		}
+		size_t MessageBuilder::GetTransformDataSize()
+		{
+			try
+			{
+				return sizeof(TransformMessage);
+			}
+			catch (...)
+			{
+				const std::string errorMessage = std::string("Cath: " + std::string(__FUNCTION__));
+				PrintError(MString() + errorMessage.c_str());
+			}
+		}
+		size_t MessageBuilder::GetCameraDataSize()
+		{
+			try
+			{
+				return sizeof(CameraMessage);
+			}
+			catch (...)
+			{
+				const std::string errorMessage = std::string("Cath: " + std::string(__FUNCTION__));
+				PrintError(MString() + errorMessage.c_str());
+			}
+		}
+		size_t MessageBuilder::GetLightDataSize()
+		{
+			try
+			{
+				return sizeof(LightMessage);
+			}
+			catch (...)
+			{
+				const std::string errorMessage = std::string("Cath: " + std::string(__FUNCTION__));
+				PrintError(MString() + errorMessage.c_str());
+			}
+		}
+		size_t MessageBuilder::GetMaterialDataSize()
+		{
+			try
+			{
+				return sizeof(MaterialMessage);
+			}
+			catch (...)
+			{
+				const std::string errorMessage = std::string("Cath: " + std::string(__FUNCTION__));
+				PrintError(MString() + errorMessage.c_str());
+			}
 		}
 	}
 }
