@@ -165,6 +165,7 @@
     <ClInclude Include="Includes.hpp" />
     <ClInclude Include="MessageBuilder.hpp" />
     <ClInclude Include="MessageHandler.hpp" />
+    <ClInclude Include="Mutex.hpp" />
     <ClInclude Include="NodeHandler.hpp" />
     <ClInclude Include="PluginMain.hpp" />
     <ClInclude Include="PluginStructs.hpp" />

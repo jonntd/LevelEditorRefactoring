@@ -18,6 +18,7 @@ namespace DoremiEditor
 			// Default Destructor
 			~CallbackHandler();
 
+			static void Initialize();
 
 			static MCallbackIdArray m_callbackIDArray;
 

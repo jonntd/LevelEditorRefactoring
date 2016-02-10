@@ -10,6 +10,7 @@ namespace DoremiEditor
 	{
 		MCallbackIdArray CallbackHandler::m_callbackIDArray;
 		NodeHandler* CallbackHandler::s_nodeHandler = nullptr;
+		MessageHandler* CallbackHandler::s_messageHandler = nullptr;
 		CallbackHandler::CallbackHandler()
 		{
 			m_callbackIDArray.append(MDGMessage::addNodeAddedCallback(CallbackHandler::cb_newNode));
@@ -19,6 +20,13 @@ namespace DoremiEditor
 			MMessage::removeCallbacks(m_callbackIDArray);
 			m_callbackIDArray.clear();
 		}
+
+		void CallbackHandler::Initialize()
+		{
+			s_nodeHandler = ApplicationContext::GetInstance().GetNodeHandler();
+			s_messageHandler = ApplicationContext::GetInstance().GetMessageHandler();
+		}
+
 		void CallbackHandler::LoadScene()
 		{
 			try

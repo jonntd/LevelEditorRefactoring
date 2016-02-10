@@ -11,6 +11,7 @@ namespace DoremiEditor
 		class MessageHandler;
 		class CallbackHandler;
 		class MessageBuilder;
+		class Filemapping;
 		class ApplicationContext
 		{
 		public:
@@ -38,6 +39,10 @@ namespace DoremiEditor
 			{
 				return m_messageBuilder;
 			}
+			Filemapping* GetFilemapping() const
+			{
+				return m_filemapping;
+			}
 			bool GetDebugStatus()
 			{
 				return m_debugMode;
@@ -46,12 +51,15 @@ namespace DoremiEditor
 			{
 				m_debugMode = p_debug;
 			}
+			void InitializeClasses();
+		
 		private:
 			bool m_debugMode;
 			NodeHandler* m_nodeHandler = nullptr;
 			MessageHandler* m_messageHandler = nullptr;
 			CallbackHandler* m_callbackHandler = nullptr;
 			MessageBuilder* m_messageBuilder = nullptr;
+			Filemapping* m_filemapping = nullptr;
 			ApplicationContext();
 			~ApplicationContext();
 			ApplicationContext(ApplicationContext const&) = delete;

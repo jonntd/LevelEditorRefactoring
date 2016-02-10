@@ -54,7 +54,7 @@
 #include <maya/MPxCommand.h>
 
 // Default stuff
-
+#include <Windows.h>
 // Plugin includes
 #include "PluginStructs.hpp"
 

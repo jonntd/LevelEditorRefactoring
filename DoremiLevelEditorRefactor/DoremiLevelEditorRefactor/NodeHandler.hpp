@@ -33,7 +33,7 @@ namespace DoremiEditor
 
 			NodeHandler();
 			~NodeHandler();
-			
+			void Initialize();
 			void AddCustomAttributesTransform( MFnTransform& p_transform);
 			void AddTransformNode(const MFnTransform& p_transform);
 			void AddMeshNode(const MFnMesh& p_mesh);

@@ -23,10 +23,13 @@ namespace DoremiEditor
 		}
 		NodeHandler::~NodeHandler()
 		{
+			
+		}
+		void NodeHandler::Initialize()
+		{
 			m_messageHandler = ApplicationContext::GetInstance().GetMessageHandler();
 			m_messageBuilder = ApplicationContext::GetInstance().GetMessageBuilder();
 		}
-
 		void NodeHandler::AddCustomAttributesTransform(MFnTransform& p_transform)
 		{
 			try
@@ -109,7 +112,8 @@ namespace DoremiEditor
 				if (m_transformVector.size() == 0)
 				{
 					m_transformVector.push_back(transformInfo);
-					m_messageBuilder->GetTransformData(transformName);
+					//m_messageBuilder->GetTransformData(transformName);
+					m_messageHandler->AddMessage(transformName, NodeType::nTransform, MessageType::msgAdded, parentName);
 				}
 				// Otherwise loop through vector to prevent duplicates
 				else
@@ -131,7 +135,7 @@ namespace DoremiEditor
 					{
 						// Add node to vector
 						m_transformVector.push_back(transformInfo);
-						m_messageBuilder->GetTransformData(transformName);
+						m_messageHandler->AddMessage(transformName, NodeType::nTransform, MessageType::msgAdded, parentName);
 						PrintDebug("Added transform ( " + MString(transformName.c_str()) + " ) with parent ( " + MString(parentName.c_str()) + " )");
 					}
 					else
@@ -182,7 +186,8 @@ namespace DoremiEditor
 				if (m_meshVector.size() == 0)
 				{
 					m_meshVector.push_back(meshInfo);
-					m_messageBuilder->GetMeshData(meshName);
+					m_messageHandler->AddMessage(meshInfo.nodeName, NodeType::nMesh, MessageType::msgAdded, "");
+					//m_messageBuilder->GetMeshData(meshName);
 					PrintDebug("Added mesh ( " + MString(meshName.c_str()) + " ) with parent ( " + MString(meshInfo.transformName.at(0).c_str()) + " )");
 				}
 				else
@@ -199,7 +204,8 @@ namespace DoremiEditor
 					if (!nodeExists)
 					{
 						m_meshVector.push_back(meshInfo);
-						m_messageBuilder->GetMeshData(meshName);
+						m_messageHandler->AddMessage(meshInfo.nodeName, NodeType::nMesh, MessageType::msgAdded, "");
+						//m_messageBuilder->GetMeshData(meshName);
 						PrintDebug("Added mesh ( " + MString(meshName.c_str()) + " ) with parent ( " + MString(meshInfo.transformName.at(0).c_str()) + " )");
 					}
 					else

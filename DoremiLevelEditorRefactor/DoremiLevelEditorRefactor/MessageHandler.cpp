@@ -2,6 +2,7 @@
 #include "NodeHandler.hpp"
 #include "ApplicationContext.hpp"
 #include "MessageBuilder.hpp"
+#include "Filemapping.hpp"
 namespace DoremiEditor
 {
 	namespace Plugin
@@ -24,8 +25,14 @@ namespace DoremiEditor
 		}
 		MessageHandler::~MessageHandler()
 		{
+			
+		}
+		void MessageHandler::Initialize()
+		{
 			m_nodeHandler = ApplicationContext::GetInstance().GetNodeHandler();
 			m_messageBuilder = ApplicationContext::GetInstance().GetMessageBuilder();
+			m_filemapping = ApplicationContext::GetInstance().GetFilemapping();
+		
 		}
 		void MessageHandler::AddMessage(const std::string p_nodeName, const NodeType p_nodeType, const MessageType p_messageType, const std::string p_secondName)
 		{
@@ -86,7 +93,29 @@ namespace DoremiEditor
 		{
 			try
 			{
-
+				MessageInfo t_messageInfo;
+				t_messageInfo.nodeName = p_nodeName;
+				t_messageInfo.nodeType = p_nodeType;
+				t_messageInfo.msgType = p_messageType;
+				t_messageInfo.oldName = p_secondName;
+				switch (p_nodeType)
+				{
+				case (NodeType::nTransform) :
+					m_filemapping->TrySendTransform(t_messageInfo);
+					break;
+				case (NodeType::nMesh) :
+					m_filemapping->TrySendMesh(t_messageInfo);
+					break;
+				case (NodeType::nCamera) :
+					
+					break;
+				case (NodeType::nLight) :
+					
+					break;
+				case (NodeType::nMaterial) :
+					
+					break;
+				}
 			}
 			catch (...)
 			{

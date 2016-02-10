@@ -42,58 +42,58 @@ namespace DoremiEditor
 						t_transformMatrix.getRotationQuaternion(t_rotations[0], t_rotations[1], t_rotations[2], t_rotations[3]);
 						t_transformMatrix.getScale(t_scale, MSpace::kTransform);
 
-						o_data.transformData.translation[0] = t_translation.x;
-						o_data.transformData.translation[1] = t_translation.y;
-						o_data.transformData.translation[2] = t_translation.z;
+						o_data.data.translation[0] = t_translation.x;
+						o_data.data.translation[1] = t_translation.y;
+						o_data.data.translation[2] = t_translation.z;
 
-						o_data.transformData.rotation[0] = t_rotations[0] * -1.0f;
-						o_data.transformData.rotation[1] = t_rotations[1] * -1.0f;
-						o_data.transformData.rotation[2] = t_rotations[2] * -1.0f;
-						o_data.transformData.rotation[3] = t_rotations[3] * -1.0f;
+						o_data.data.rotation[0] = t_rotations[0] * -1.0f;
+						o_data.data.rotation[1] = t_rotations[1] * -1.0f;
+						o_data.data.rotation[2] = t_rotations[2] * -1.0f;
+						o_data.data.rotation[3] = t_rotations[3] * -1.0f;
 
-						o_data.transformData.scale[0] = t_scale[0];
-						o_data.transformData.scale[1] = t_scale[1];
-						o_data.transformData.scale[2] = t_scale[2];
+						o_data.data.scale[0] = t_scale[0];
+						o_data.data.scale[1] = t_scale[1];
+						o_data.data.scale[2] = t_scale[2];
 
 						MPlug t_plug = t_transform.findPlug("drmRender");
-						t_plug.getValue(o_data.transformData.attributes.isRendered);
+						t_plug.getValue(o_data.data.attributes.isRendered);
 						t_plug = t_transform.findPlug("drmBBox");
-						t_plug.getValue(o_data.transformData.attributes.isBBox);
+						t_plug.getValue(o_data.data.attributes.isBBox);
 						t_plug = t_transform.findPlug("drmCollidable");
-						t_plug.getValue(o_data.transformData.attributes.isCollider);
+						t_plug.getValue(o_data.data.attributes.isCollider);
 						t_plug = t_transform.findPlug("drmAIground");
-						t_plug.getValue(o_data.transformData.attributes.isAIground);
+						t_plug.getValue(o_data.data.attributes.isAIground);
 						t_plug = t_transform.findPlug("drmInteractable");
-						t_plug.getValue(o_data.transformData.attributes.isInteractable);
+						t_plug.getValue(o_data.data.attributes.isInteractable);
 						t_plug = t_transform.findPlug("drmInteractIntevalX");
-						t_plug.getValue(o_data.transformData.attributes.interactIntervalX);
+						t_plug.getValue(o_data.data.attributes.interactIntervalX);
 						t_plug = t_transform.findPlug("drmInteractIntevalY");
-						t_plug.getValue(o_data.transformData.attributes.interactIntervalY);
+						t_plug.getValue(o_data.data.attributes.interactIntervalY);
 						t_plug = t_transform.findPlug("drmInteractIntevalZ");
-						t_plug.getValue(o_data.transformData.attributes.interactIntervalZ);
+						t_plug.getValue(o_data.data.attributes.interactIntervalZ);
 						t_plug = t_transform.findPlug("drmSpawner");
-						t_plug.getValue(o_data.transformData.attributes.typeSpawner);
+						t_plug.getValue(o_data.data.attributes.typeSpawner);
 						t_plug = t_transform.findPlug("drmCheckPoint");
-						t_plug.getValue(o_data.transformData.attributes.typeCheckPoint);
+						t_plug.getValue(o_data.data.attributes.typeCheckPoint);
 						t_plug = t_transform.findPlug("drmLevelStartEnd");
-						t_plug.getValue(o_data.transformData.attributes.typeStartEnd);
+						t_plug.getValue(o_data.data.attributes.typeStartEnd);
 
 						if (ApplicationContext::GetInstance().GetDebugStatus())
 						{
-							MString t_str1 = " Translation( " + MString() + o_data.transformData.translation[0];
-							t_str1 += " , " + MString() + o_data.transformData.translation[1];
-							t_str1 += " , " + MString() + o_data.transformData.translation[2] + " )";
+							MString t_str1 = " Translation( " + MString() + o_data.data.translation[0];
+							t_str1 += " , " + MString() + o_data.data.translation[1];
+							t_str1 += " , " + MString() + o_data.data.translation[2] + " )";
 							PrintDebug(MString(o_data.nodeName.c_str()) + t_str1);
 
-							MString t_str2 = " Rotation( " + MString() + o_data.transformData.rotation[0];
-							t_str2 += " , " + MString() + o_data.transformData.rotation[1];
-							t_str2 += " , " + MString() + o_data.transformData.rotation[2];
-							t_str2 += " , " + MString() + o_data.transformData.rotation[3] + " )";
+							MString t_str2 = " Rotation( " + MString() + o_data.data.rotation[0];
+							t_str2 += " , " + MString() + o_data.data.rotation[1];
+							t_str2 += " , " + MString() + o_data.data.rotation[2];
+							t_str2 += " , " + MString() + o_data.data.rotation[3] + " )";
 							PrintDebug(MString(o_data.nodeName.c_str()) + t_str2);
 
-							MString t_str3 = " Scale( " + MString() + o_data.transformData.scale[0];
-							t_str3 += " , " + MString() + o_data.transformData.scale[1];
-							t_str3 += " , " + MString() + o_data.transformData.scale[2] + " )";
+							MString t_str3 = " Scale( " + MString() + o_data.data.scale[0];
+							t_str3 += " , " + MString() + o_data.data.scale[1];
+							t_str3 += " , " + MString() + o_data.data.scale[2] + " )";
 							PrintDebug(MString(o_data.nodeName.c_str()) + t_str3);
 						}
 						return o_data;
@@ -319,25 +319,32 @@ namespace DoremiEditor
 						o_data.materialName = t_materialName;
 						o_data.meshID = 0;
 						o_data.nodeName = p_nodeName;
-						o_data.meshData.vertCount = t_mesh.numVertices();
-						o_data.meshData.normalCount = t_mesh.numNormals();
-						o_data.meshData.UVCount = t_mesh.numUVs();
-						o_data.meshData.vertices = t_vertexList;
-						o_data.meshData.normals = t_normalsList;
-						o_data.meshData.indCount = t_triangleVertexIDs.length();
-						o_data.meshData.triCount = t_trianglePerPolyCount.length();
+						o_data.data.vertCount = t_mesh.numVertices();
+						o_data.data.normalCount = t_mesh.numNormals();
+						o_data.data.UVCount = t_mesh.numUVs();
+						o_data.data.vertices = t_vertexList;
+						o_data.data.normals = t_normalsList;
+						o_data.data.indCount = t_triangleVertexIDs.length();
+						o_data.data.triCount = t_trianglePerPolyCount.length();
+						
+						o_data.data.uv = new float2[t_mesh.numUVs()];
+						for (int i = 0; i < o_data.data.UVCount; i++)
+						{
+							o_data.data.uv[i][0] = t_uArray[i];
+							o_data.data.uv[i][1] = t_vArray[i];
+						}
 
-						o_data.meshData.triPerFace = new int[t_trianglePerPolyCount.length()];
-						t_trianglePerPolyCount.get(o_data.meshData.triPerFace);
+						o_data.data.triPerFace = new int[t_trianglePerPolyCount.length()];
+						t_trianglePerPolyCount.get(o_data.data.triPerFace);
 
-						o_data.meshData.triIndices = new int[o_data.meshData.indCount];
-						t_triangleVertexIDs.get(o_data.meshData.triIndices);
+						o_data.data.triIndices = new int[o_data.data.indCount];
+						t_triangleVertexIDs.get(o_data.data.triIndices);
 
-						o_data.meshData.norIndices = new int[t_triangleNormalIDs.length()];
-						t_triangleNormalIDs.get(o_data.meshData.norIndices);
+						o_data.data.norIndices = new int[t_triangleNormalIDs.length()];
+						t_triangleNormalIDs.get(o_data.data.norIndices);
 
-						o_data.meshData.UVIndices = new int[t_triangleUVIDs.length()];
-						t_triangleUVIDs.get(o_data.meshData.UVIndices);
+						o_data.data.UVIndices = new int[t_triangleUVIDs.length()];
+						t_triangleUVIDs.get(o_data.data.UVIndices);
 						
 						if (ApplicationContext::GetInstance().GetDebugStatus())
 						{
@@ -350,9 +357,9 @@ namespace DoremiEditor
 							str += ")";
 							PrintDebug(namestr + str);
 							PrintDebug(namestr + " Material ( " + MString(o_data.materialName.c_str()) + " )");
-							MString str2 = "Vert# " + MString() + o_data.meshData.vertCount;
-							str2 += " Normals# " + MString() + o_data.meshData.normalCount;
-							str2 += " UVs# " + MString() + o_data.meshData.UVCount;
+							MString str2 = "Vert# " + MString() + o_data.data.vertCount;
+							str2 += " Normals# " + MString() + o_data.data.normalCount;
+							str2 += " UVs# " + MString() + o_data.data.UVCount;
 							PrintDebug(namestr + str2);
 							
 						}
@@ -409,20 +416,20 @@ namespace DoremiEditor
 						//
 						o_data.nodeName = p_nodeName;
 						o_data.transformName = t_parentName;
-						o_data.camData.isOrtho = t_isOrtho;
+						o_data.data.isOrtho = t_isOrtho;
 						if (t_isOrtho)
 						{
-							o_data.camData.hAngle = t_camera.orthoWidth();
+							o_data.data.hAngle = t_camera.orthoWidth();
 						}
 						else
 						{
-							o_data.camData.hAngle = t_fov;
+							o_data.data.hAngle = t_fov;
 						}
 						for (int i = 0; i < 3; ++i)
 						{
-							o_data.camData.rightVector[i] = t_right[i];
-							o_data.camData.target[i] = t_direction[i];
-							o_data.camData.upVector[i] = t_up[i];
+							o_data.data.rightVector[i] = t_right[i];
+							o_data.data.target[i] = t_direction[i];
+							o_data.data.upVector[i] = t_up[i];
 						}
 						if (ApplicationContext::GetInstance().GetDebugStatus())
 						{
@@ -430,7 +437,7 @@ namespace DoremiEditor
 							PrintDebug(MString(p_nodeName.c_str()) + " Dir(" + MString() + t_direction.x + " , " + MString() + t_direction.y + " , " + MString() + t_direction.z + ")");
 							PrintDebug(MString(p_nodeName.c_str()) + " Up(" + MString() + t_up.x + " , " + MString() + t_up.y + " , " + MString() + t_up.z + ")");
 							PrintDebug(MString(p_nodeName.c_str()) + " Orthographic: " + MString() + t_isOrtho);
-							PrintDebug(MString(p_nodeName.c_str()) + " Horizontal fov / Orthographic width: " + MString() + o_data.camData.hAngle);
+							PrintDebug(MString(p_nodeName.c_str()) + " Horizontal fov / Orthographic width: " + MString() + o_data.data.hAngle);
 						}
 
 					}
@@ -482,36 +489,36 @@ namespace DoremiEditor
 						//
 						o_data.nodeName = p_nodeName;
 						o_data.transformName = t_parentName;
-						o_data.lightData.intensity = t_intensity;
-						std::copy(t_RGBColor, t_RGBColor + 3, o_data.lightData.colorDiffuse);
+						o_data.data.intensity = t_intensity;
+						std::copy(t_RGBColor, t_RGBColor + 3, o_data.data.colorDiffuse);
 						
 						//
 						// Fill Specific data
 						//
 						if (t_dagPath.hasFn(MFn::kDirectionalLight))
 						{
-							o_data.lightData.type = 1;
+							o_data.data.type = 1;
 							MFnDirectionalLight t_directionalLight(t_dagPath, &result);
 							MFloatVector t_direction(t_baseLight.lightDirection(0, MSpace::kWorld, &result));
-							o_data.lightData.direction[0] = t_direction.x;
-							o_data.lightData.direction[1] = t_direction.y;
-							o_data.lightData.direction[2] = t_direction.z;
+							o_data.data.direction[0] = t_direction.x;
+							o_data.data.direction[1] = t_direction.y;
+							o_data.data.direction[2] = t_direction.z;
 
 						}
 						else if (t_dagPath.hasFn(MFn::kSpotLight))
 						{
-							o_data.lightData.type = 2;
+							o_data.data.type = 2;
 							MFnSpotLight t_spotLight(t_dagPath, &result);
-							o_data.lightData.decayType = t_spotLight.decayRate();
-							o_data.lightData.coneAngle = t_spotLight.coneAngle();
-							o_data.lightData.penumAgle = t_spotLight.penumbraAngle();
-							o_data.lightData.dropOff = t_spotLight.dropOff();
+							o_data.data.decayType = t_spotLight.decayRate();
+							o_data.data.coneAngle = t_spotLight.coneAngle();
+							o_data.data.penumAgle = t_spotLight.penumbraAngle();
+							o_data.data.dropOff = t_spotLight.dropOff();
 						}
 						else if (t_dagPath.hasFn(MFn::kPointLight))
 						{
-							o_data.lightData.type = 3;
+							o_data.data.type = 3;
 							MFnPointLight t_pointLight(t_dagPath, &result);
-							o_data.lightData.decayType = t_pointLight.decayRate();
+							o_data.data.decayType = t_pointLight.decayRate();
 						}
 
 
@@ -694,22 +701,22 @@ namespace DoremiEditor
 						t_mesh.getTriangles(t_trianglePerPolyCount, t_triangleVertexIDs);
 
 						o_mesh.transformCount = t_mesh.parentCount();
-						o_mesh.meshData.vertCount = t_mesh.numVertices();
-						o_mesh.meshData.normalCount = t_mesh.numNormals();
-						o_mesh.meshData.UVCount = t_mesh.numUVs();
-						o_mesh.meshData.indCount = t_triangleVertexIDs.length();
-						o_mesh.meshData.triCount = t_trianglePerPolyCount.length();
+						o_mesh.data.vertCount = t_mesh.numVertices();
+						o_mesh.data.normalCount = t_mesh.numNormals();
+						o_mesh.data.UVCount = t_mesh.numUVs();
+						o_mesh.data.indCount = t_triangleVertexIDs.length();
+						o_mesh.data.triCount = t_trianglePerPolyCount.length();
 
 						size_t t_messageSize = 0;
 						t_messageSize += sizeof(char) * 100;
 						t_messageSize += (sizeof(char) * 100)*static_cast<int>(o_mesh.transformCount);
 						t_messageSize += sizeof(char) * 100;
 						t_messageSize += sizeof(int) * 8;
-						t_messageSize += (sizeof(float) * 3) * o_mesh.meshData.vertCount;
-						t_messageSize += (sizeof(float) * 3) * o_mesh.meshData.normalCount;
-						t_messageSize += (sizeof(float) * 2) * o_mesh.meshData.UVCount;
-						t_messageSize += (sizeof(int) * 3) * o_mesh.meshData.indCount;
-						t_messageSize += sizeof(int) * o_mesh.meshData.triCount;
+						t_messageSize += (sizeof(float) * 3) * o_mesh.data.vertCount;
+						t_messageSize += (sizeof(float) * 3) * o_mesh.data.normalCount;
+						t_messageSize += (sizeof(float) * 2) * o_mesh.data.UVCount;
+						t_messageSize += (sizeof(int) * 3) * o_mesh.data.indCount;
+						t_messageSize += sizeof(int) * o_mesh.data.triCount;
 						return t_messageSize;
 					}
 				}

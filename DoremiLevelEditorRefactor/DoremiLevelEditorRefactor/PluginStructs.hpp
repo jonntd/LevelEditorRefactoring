@@ -115,13 +115,13 @@ namespace DoremiEditor
 		{
 			std::string nodeName;
 			std::string parentName; //om ingen parent sätt till 0 första bokstav fuck off.
-			TransformData transformData;
+			TransformData data;
 		};
 		struct TransformMessage
 		{
 			char nodeName[100];
 			char parentName[100];
-			TransformData trData;
+			TransformData data;
 		};
 		struct MeshData
 		{
@@ -152,7 +152,7 @@ namespace DoremiEditor
 
 			int meshID;
 			int materialID;
-			MeshData meshData;
+			MeshData data;
 		};
 		struct MeshMessage
 		{
@@ -162,7 +162,7 @@ namespace DoremiEditor
 			char materialName[100];
 			int meshID;
 			int materialID;
-			MeshData meshData;
+			MeshData data;
 		};
 		struct CameraData
 		{
@@ -176,13 +176,13 @@ namespace DoremiEditor
 		{
 			std::string nodeName;
 			std::string transformName;
-			CameraData camData;
+			CameraData data;
 		};
 		struct CameraMessage
 		{
 			char nodeName[100];
 			char transformName[100];
-			CameraData camData;
+			CameraData data;
 		};
 		struct MaterialData
 		{
@@ -251,13 +251,28 @@ namespace DoremiEditor
 		{
 			std::string nodeName;
 			std::string transformName;
-			LightData lightData;
+			LightData data;
 		};
 		struct LightMessage
 		{
 			char nodeName[100];
 			char transformName[100];
-			LightData lightData;
+			LightData data;
+		};
+		struct FilemapInfo {
+			size_t head_ByteOffset; //offset in bytes from beginning of the shared memory
+			size_t tail_ByteOffset; //offset in bytes from beginning of the shared memory
+			size_t non_accessmemoryOffset; //memory in beginning of file thats no touchy, so that head and tail won't get to each other
+										   //size_t totalConsumers;
+			size_t messageFilemap_Size;
+
+			FilemapInfo() {
+				head_ByteOffset = 0;
+				tail_ByteOffset = 0;
+				non_accessmemoryOffset = 0;
+				//totalConsumers = 0;
+				messageFilemap_Size = 0; //storleken på filemapen med meddelanden
+			}
 		};
 	}
 }
