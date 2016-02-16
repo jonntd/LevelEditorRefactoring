@@ -8,6 +8,7 @@ namespace DoremiEditor
 	{
 		class NodeHandler;
 		class MessageHandler;
+		class Filemapping;
 		class CallbackHandler
 		{
 		private:
@@ -21,7 +22,8 @@ namespace DoremiEditor
 			static void Initialize();
 
 			static MCallbackIdArray m_callbackIDArray;
-
+			static M3dView m_modelPanel;
+			static float m_updateFrequency;
 
 			static NodeHandler* s_nodeHandler;
 			static MessageHandler* s_messageHandler;

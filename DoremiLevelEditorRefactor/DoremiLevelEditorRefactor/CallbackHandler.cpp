@@ -2,6 +2,7 @@
 #include "NodeHandler.hpp"
 #include "MessageHandler.hpp"
 #include "ApplicationContext.hpp"
+#include "Filemapping.hpp"
 #include <string>
 
 namespace DoremiEditor
@@ -11,9 +12,11 @@ namespace DoremiEditor
 		MCallbackIdArray CallbackHandler::m_callbackIDArray;
 		NodeHandler* CallbackHandler::s_nodeHandler = nullptr;
 		MessageHandler* CallbackHandler::s_messageHandler = nullptr;
+		M3dView CallbackHandler::m_modelPanel;
+		float CallbackHandler::m_updateFrequency = 0.0f;
 		CallbackHandler::CallbackHandler()
 		{
-			m_callbackIDArray.append(MDGMessage::addNodeAddedCallback(CallbackHandler::cb_newNode));
+			m_updateFrequency = 0.2f;
 		}
 		CallbackHandler::~CallbackHandler()
 		{
@@ -25,6 +28,8 @@ namespace DoremiEditor
 		{
 			s_nodeHandler = ApplicationContext::GetInstance().GetNodeHandler();
 			s_messageHandler = ApplicationContext::GetInstance().GetMessageHandler();
+			m_callbackIDArray.append(MDGMessage::addNodeAddedCallback(CallbackHandler::cb_newNode));
+			m_callbackIDArray.append(MTimerMessage::addTimerCallback(m_updateFrequency, CallbackHandler::cb_timer));
 		}
 
 		void CallbackHandler::LoadScene()
@@ -36,6 +41,10 @@ namespace DoremiEditor
 					s_nodeHandler = ApplicationContext::GetInstance().GetNodeHandler();
 				}
 				MStatus result;
+
+				result = M3dView::getM3dViewFromModelPanel("modelPanel4", m_modelPanel);
+				m_callbackIDArray.append(MUiMessage::addCameraChangedCallback("modelPanel4", cb_cameraPanels));
+
 				MItDependencyNodes itDep(MFn::kLambert);
 				while (!itDep.isDone())
 				{
@@ -91,7 +100,13 @@ namespace DoremiEditor
 							}
 						}
 					}
-
+				}
+				MDagPath t_currentCameraPath;
+				result = m_modelPanel.getCamera(t_currentCameraPath);
+				if (result)
+				{
+					MFnCamera t_camera(t_currentCameraPath);
+					s_messageHandler->AddMessage(t_camera.name().asChar(), NodeType::nCamera, MessageType::msgSwitched, "");
 				}
 			}
 			catch (...)
@@ -149,7 +164,10 @@ namespace DoremiEditor
 		{
 			try
 			{
-
+				if (ApplicationContext::GetInstance().GetFilemapping()->GetFilemapStatus())
+				{
+					s_messageHandler->SendDelayedMessages();
+				}
 			}
 			catch (...)
 			{
@@ -161,7 +179,36 @@ namespace DoremiEditor
 		{
 			try
 			{
-
+				MStatus result;
+				if (p_node.hasFn(MFn::kTransform))
+				{
+					MFnTransform t_transform(p_node, &result);
+					s_nodeHandler->NodeDeletedTransform(t_transform.name().asChar());
+				}
+				else if (p_node.hasFn(MFn::kMesh))
+				{
+					MFnMesh t_mesh(p_node, &result);
+					s_nodeHandler->NodeDeletedMesh(t_mesh.name().asChar());
+				}
+				else if (p_node.hasFn(MFn::kCamera))
+				{
+					MFnCamera t_camera(p_node, &result);
+					s_nodeHandler->NodeDeletedCamera(t_camera.name().asChar());
+				}
+				else if (p_node.hasFn(MFn::kLight))
+				{
+					MFnLight t_light(p_node, &result);
+					s_nodeHandler->NodeDeletedLight(t_light.name().asChar());
+				}
+				else if (p_node.hasFn(MFn::kLambert))
+				{
+					MFnDependencyNode t_material(p_node, &result);
+					s_nodeHandler->NodeDeletedMaterial(t_material.name().asChar());
+				}
+				else
+				{
+					PrintWarning("Unknown node removed");
+				}
 			}
 			catch (...)
 			{
@@ -281,10 +328,11 @@ namespace DoremiEditor
 					std::string t_plugName = plug_1.name().asChar();
 					if (t_plugName.find("pnts") != std::string::npos && t_plugName.find("[") != std::string::npos)
 					{
-						PrintDebug(t_mesh.name() + " Mesh message to be added ");
+						s_messageHandler->AddMessage(t_mesh.name().asChar(), NodeType::nMesh, MessageType::msgEdited);
 					}
 					else if (plug_2.node().apiType() == MFn::Type::kShadingEngine)
 					{
+						s_messageHandler->AddMessage(t_mesh.name().asChar(), NodeType::nMesh, MessageType::msgEdited);
 						PrintDebug(t_mesh.name() + " Mesh message to be added (shading engine changed)");
 					}
 				}
@@ -304,7 +352,7 @@ namespace DoremiEditor
 				MFnMesh t_mesh(p_node, &result);
 				if (result)
 				{
-					PrintDebug(t_mesh.name() + " Mesh poly message to be added ");
+					s_messageHandler->AddMessage(t_mesh.name().asChar(), NodeType::nMesh, MessageType::msgEdited);
 				}
 				else
 				{	
@@ -326,10 +374,16 @@ namespace DoremiEditor
 				if (p_msg & MNodeMessage::AttributeMessage::kAttributeSet)
 				{
 					MFnTransform t_transform(plug_1.node(), &result);
+					std::string t_plugName = plug_1.name().asChar();
 					if (result)
 					{
-						//add message
-						PrintDebug(t_transform.name() + " transform changed message to be added");
+						if (t_plugName.find(".translate") != std::string::npos
+							|| t_plugName.find(".rotate") != std::string::npos
+							|| t_plugName.find(".scale") != std::string::npos
+							|| t_plugName.find(".drm") != std::string::npos)
+						{
+							s_messageHandler->AddMessage(t_transform.name().asChar(), NodeType::nTransform, MessageType::msgEdited, "");
+						}
 					}
 				}
 			}
@@ -344,7 +398,12 @@ namespace DoremiEditor
 		{
 			try
 			{
-
+				if (p_node.hasFn(MFn::kCamera))
+				{
+					MFnCamera t_camera(p_node);
+					PrintDebug("Current camera: " + t_camera.name() + " . Old: " + p_str);
+					s_messageHandler->AddDelayedMessage(t_camera.name().asChar(), NodeType::nCamera, MessageType::msgSwitched, "");
+				}
 			}
 			catch (...)
 			{
@@ -354,7 +413,24 @@ namespace DoremiEditor
 		}
 		void CallbackHandler::cb_cameraAttributeChange(MNodeMessage::AttributeMessage p_msg, MPlug& plug_1, MPlug& plug_2, void* p_clientData)
 		{
-
+			try
+			{
+				// TODOXX: Detects ALL changes on camera nodes. Would be a good idea to only detect changes on relevant plugs
+				MStatus result;
+				std::string t_plugName = plug_1.name().asChar();
+					
+				MFnCamera t_camera(plug_1.node(), &result);
+				if (result)
+				{
+					s_messageHandler->AddDelayedMessage(t_camera.name().asChar(), NodeType::nCamera, MessageType::msgEdited, "");
+				}
+					
+			}
+			catch (...)
+			{
+				const std::string errorMessage = std::string("Cath: " + std::string(__FUNCTION__));
+				PrintError(MString() + errorMessage.c_str());
+			}
 		}
 		void CallbackHandler::cb_lightEvaluate(MNodeMessage::AttributeMessage msg, MPlug& plug_1, MPlug& plug_2, void* clientData)
 		{
@@ -490,6 +566,7 @@ namespace DoremiEditor
 					if (sendMsg)
 					{
 						PrintDebug("Material change " + MString(plugName.c_str()));
+						s_messageHandler->AddMessage(mat.name().asChar(), NodeType::nMaterial, MessageType::msgEdited);
 						// Add a message
 					}
 				}

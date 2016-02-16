@@ -186,7 +186,7 @@ namespace DoremiEditor
 				if (m_meshVector.size() == 0)
 				{
 					m_meshVector.push_back(meshInfo);
-					m_messageHandler->AddMessage(meshInfo.nodeName, NodeType::nMesh, MessageType::msgAdded, "");
+					m_messageHandler->AddMessage(meshInfo.nodeName, NodeType::nMesh, MessageType::msgAdded);
 					//m_messageBuilder->GetMeshData(meshName);
 					PrintDebug("Added mesh ( " + MString(meshName.c_str()) + " ) with parent ( " + MString(meshInfo.transformName.at(0).c_str()) + " )");
 				}
@@ -204,7 +204,7 @@ namespace DoremiEditor
 					if (!nodeExists)
 					{
 						m_meshVector.push_back(meshInfo);
-						m_messageHandler->AddMessage(meshInfo.nodeName, NodeType::nMesh, MessageType::msgAdded, "");
+						m_messageHandler->AddMessage(meshInfo.nodeName, NodeType::nMesh, MessageType::msgAdded);
 						//m_messageBuilder->GetMeshData(meshName);
 						PrintDebug("Added mesh ( " + MString(meshName.c_str()) + " ) with parent ( " + MString(meshInfo.transformName.at(0).c_str()) + " )");
 					}
@@ -225,7 +225,55 @@ namespace DoremiEditor
 		{
 			try
 			{
-
+				MFnCamera t_camera(p_camera.object());
+				std::string cameraName = t_camera.name().asChar();
+				std::string parentName;
+				if (t_camera.parent(0).hasFn(MFn::kTransform))
+				{
+					MFnTransform t_transformParent(t_camera.parent(0));
+					parentName = t_transformParent.name().asChar();
+				}
+				else
+				{
+					parentName = "";
+				}
+				CameraInfo cameraInfo{ cameraName, parentName };
+				// If no entries are added already, no need to loop.
+				if (m_cameraVector.size() == 0)
+				{
+					m_cameraVector.push_back(cameraInfo);
+					//m_messageBuilder->GetTransformData(transformName);
+					m_messageHandler->AddMessage(cameraName, NodeType::nCamera, MessageType::msgAdded, parentName);
+				}
+				// Otherwise loop through vector to prevent duplicates
+				else
+				{
+					bool nodeExists = false;
+					for (std::vector<CameraInfo>::size_type i = 0; i != m_cameraVector.size(); ++i)
+					{
+						if (strcmp(cameraName.c_str(), m_cameraVector.at(i).nodeName.c_str()) == 0)
+						{
+							nodeExists = true;
+							break;
+						}
+						else
+						{
+							// Node doesn't exist in vectors and will be added in the next step.
+						}
+					}
+					if (!nodeExists)
+					{
+						// Add node to vector
+						m_cameraVector.push_back(cameraInfo);
+						m_messageHandler->AddMessage(cameraName, NodeType::nCamera, MessageType::msgAdded, parentName);
+						PrintDebug("Added camera ( " + MString(cameraName.c_str()) + " ) with parent ( " + MString(parentName.c_str()) + " )");
+					}
+					else
+					{
+						PrintDebug("Camera " + MString(cameraName.c_str()) + " already exists!");
+					}
+				}
+				PrintVectorInfo();
 			}
 			catch (...)
 			{
@@ -242,6 +290,7 @@ namespace DoremiEditor
 				if (m_materialVector.size() == 0)
 				{
 					m_materialVector.push_back(t_materialInfo);
+					m_messageHandler->AddMessage(t_materialInfo.nodeName, NodeType::nMaterial, MessageType::msgAdded);
 					PrintDebug("Added material: " + p_material.name());
 				}
 				else
@@ -257,12 +306,13 @@ namespace DoremiEditor
 					}
 					if (nodeExists)
 					{
-
+						PrintWarning("Material node " + p_material.name() + " already exists!");
 					}
 					else
 					{
 						m_materialVector.push_back(t_materialInfo);
-						m_messageBuilder->GetMaterialData(t_materialInfo.nodeName);
+						PrintDebug("Added material: " + p_material.name());
+						m_messageHandler->AddMessage(t_materialInfo.nodeName, NodeType::nMaterial, MessageType::msgAdded);
 					}
 				}
 			}
@@ -511,23 +561,123 @@ namespace DoremiEditor
 		}
 		void NodeHandler::NodeDeletedTransform(const std::string p_nodeName)
 		{
+			try
+			{
+				MStatus result;
+				for (std::vector<TransformInfo>::size_type i = 0; i < m_transformVector.size(); ++i)
+				{
+					
+					if (strcmp(p_nodeName.c_str(), m_transformVector.at(i).nodeName.c_str()) == 0)
+					{
+						if (m_messageHandler->AddMessage(p_nodeName, NodeType::nTransform, MessageType::msgDeleted))
+						{
+							m_transformVector.erase(m_transformVector.begin() + i);
+						}
 
+					}
+				}
+			}
+			catch (...)
+			{
+				const std::string errorMessage = std::string("Cacth: " + std::string(__FUNCTION__));
+				PrintError(MString() + errorMessage.c_str());
+			}
 		}
 		void NodeHandler::NodeDeletedMesh(const std::string p_nodeName)
 		{
+			try
+			{
+				MStatus result;
+				for (std::vector<MeshInfo>::size_type i = 0; i < m_meshVector.size(); ++i)
+				{
 
+					if (strcmp(p_nodeName.c_str(), m_meshVector.at(i).nodeName.c_str()) == 0)
+					{
+						if (m_messageHandler->AddMessage(p_nodeName, NodeType::nMesh, MessageType::msgDeleted))
+						{
+							m_meshVector.erase(m_meshVector.begin() + i);
+						}
+
+					}
+				}
+			}
+			catch (...)
+			{
+				const std::string errorMessage = std::string("Cacth: " + std::string(__FUNCTION__));
+				PrintError(MString() + errorMessage.c_str());
+			}
 		}
 		void NodeHandler::NodeDeletedCamera(const std::string p_nodeName) 
 		{
+			try
+			{
+				MStatus result;
+				for (std::vector<CameraInfo>::size_type i = 0; i < m_cameraVector.size(); ++i)
+				{
 
+					if (strcmp(p_nodeName.c_str(), m_cameraVector.at(i).nodeName.c_str()) == 0)
+					{
+						if (m_messageHandler->AddMessage(p_nodeName, NodeType::nCamera, MessageType::msgDeleted))
+						{
+							m_cameraVector.erase(m_cameraVector.begin() + i);
+						}
+
+					}
+				}
+			}
+			catch (...)
+			{
+				const std::string errorMessage = std::string("Cacth: " + std::string(__FUNCTION__));
+				PrintError(MString() + errorMessage.c_str());
+			}
 		}
 		void NodeHandler::NodeDeletedLight(const std::string p_nodeName) 
 		{
+			try
+			{
+				MStatus result;
+				for (std::vector<LightInfo>::size_type i = 0; i < m_lightVector.size(); ++i)
+				{
 
+					if (strcmp(p_nodeName.c_str(), m_lightVector.at(i).nodeName.c_str()) == 0)
+					{
+						if (m_messageHandler->AddMessage(p_nodeName, NodeType::nLight, MessageType::msgDeleted))
+						{
+							m_lightVector.erase(m_lightVector.begin() + i);
+						}
+
+					}
+				}
+			}
+			catch (...)
+			{
+				const std::string errorMessage = std::string("Cacth: " + std::string(__FUNCTION__));
+				PrintError(MString() + errorMessage.c_str());
+			}
 		}
 		void NodeHandler::NodeDeletedMaterial(const std::string p_nodeName) 
 		{
+			try
+			{
+				MStatus result;
+				for (std::vector<MaterialInfo>::size_type i = 0; i < m_materialVector.size(); ++i)
+				{
 
+					if (strcmp(p_nodeName.c_str(), m_materialVector.at(i).nodeName.c_str()) == 0)
+					{
+						if (m_messageHandler->AddMessage(p_nodeName, NodeType::nMaterial, MessageType::msgDeleted))
+						{
+							m_materialVector.erase(m_materialVector.begin() + i);
+						}
+
+					}
+				}
+			}
+			catch (...)
+			{
+				const std::string errorMessage = std::string("Cacth: " + std::string(__FUNCTION__));
+				PrintError(MString() + errorMessage.c_str());
+			}
 		}
 		
 

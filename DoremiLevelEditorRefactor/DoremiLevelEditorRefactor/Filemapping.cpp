@@ -255,8 +255,8 @@ namespace DoremiEditor
 
 				totalSize = MakeMultiple(msgSize);
 				padding = totalSize - msgSize;
-				PrintDebug("*   Transform Message Sizes(p_header,MSG,PDG,TOT): " + MString() + sizeof(MessageHeader) + " " + MString() + (msgSize - sizeof(MessageHeader))
-					+ " " + MString() + padding + " " + MString() + totalSize);
+				/*PrintDebug("*   Transform Message Sizes(p_header,MSG,PDG,TOT): " + MString() + sizeof(MessageHeader) + " " + MString() + (msgSize - sizeof(MessageHeader))
+					+ " " + MString() + padding + " " + MString() + totalSize);*/
 
 				o_header.nodeType = static_cast<int>(p_messageInfo.nodeType);
 				o_header.messageType = static_cast<int>(p_messageInfo.msgType);
@@ -313,8 +313,8 @@ namespace DoremiEditor
 
 					totalSize = MakeMultiple(msgSize);
 					padding = totalSize - msgSize;
-					PrintDebug("*   Camera Message Sizes(p_header,MSG,PDG,TOT): " + MString() + sizeof(MessageHeader) + " " + MString() + (msgSize - sizeof(MessageHeader))
-						+ " " + MString() + padding + " " + MString() + totalSize);
+					/*PrintDebug("*   Camera Message Sizes(p_header,MSG,PDG,TOT): " + MString() + sizeof(MessageHeader) + " " + MString() + (msgSize - sizeof(MessageHeader))
+						+ " " + MString() + padding + " " + MString() + totalSize);*/
 					MessageHeader o_header;
 					o_header.nodeType = static_cast<int>(p_messageInfo.nodeType);
 					o_header.messageType = static_cast<int>(p_messageInfo.msgType);
@@ -342,8 +342,8 @@ namespace DoremiEditor
 
 					totalSize = MakeMultiple(msgSize);
 					padding = totalSize - msgSize;
-					PrintDebug("*   Light Message Sizes(p_header,MSG,PDG,TOT): " + MString() + sizeof(MessageHeader) + " " + MString() + (msgSize - sizeof(MessageHeader))
-						+ " " + MString() + padding + " " + MString() + totalSize);
+					/*PrintDebug("*   Light Message Sizes(p_header,MSG,PDG,TOT): " + MString() + sizeof(MessageHeader) + " " + MString() + (msgSize - sizeof(MessageHeader))
+						+ " " + MString() + padding + " " + MString() + totalSize);*/
 					MessageHeader o_header;
 					o_header.nodeType = static_cast<int>(p_messageInfo.nodeType);
 					o_header.messageType = static_cast<int>(p_messageInfo.msgType);
@@ -371,8 +371,8 @@ namespace DoremiEditor
 
 					totalSize = MakeMultiple(msgSize);
 					padding = totalSize - msgSize;
-					PrintDebug("*   Material Message Sizes(p_header,MSG,PDG,TOT): " + MString() + sizeof(MessageHeader) + " " + MString() + (msgSize - sizeof(MessageHeader))
-						+ " " + MString() + padding + " " + MString() + totalSize);
+					/*PrintDebug("*   Material Message Sizes(p_header,MSG,PDG,TOT): " + MString() + sizeof(MessageHeader) + " " + MString() + (msgSize - sizeof(MessageHeader))
+						+ " " + MString() + padding + " " + MString() + totalSize);*/
 					MessageHeader o_header;
 					o_header.nodeType = static_cast<int>(p_messageInfo.nodeType);
 					o_header.messageType = static_cast<int>(p_messageInfo.msgType);
@@ -400,8 +400,8 @@ namespace DoremiEditor
 
 				totalSize = MakeMultiple(msgSize);
 				padding = totalSize - msgSize;
-				PrintDebug("*   Rename / Delete Message Sizes(p_header,MSG,PDG,TOT): " + MString() + sizeof(MessageHeader) + " " + MString() + (msgSize - sizeof(MessageHeader))
-					+ " " + MString() + padding + " " + MString() + totalSize);
+				/*PrintDebug("*   Rename / Delete Message Sizes(p_header,MSG,PDG,TOT): " + MString() + sizeof(MessageHeader) + " " + MString() + (msgSize - sizeof(MessageHeader))
+					+ " " + MString() + padding + " " + MString() + totalSize);*/
 				MessageHeader o_header;
 				o_header.nodeType = static_cast<int>(p_messageInfo.nodeType);
 				o_header.messageType = static_cast<int>(p_messageInfo.msgType);
@@ -434,12 +434,12 @@ namespace DoremiEditor
 					if (p_header.byteSize + p_header.bytePadding + m_localHead + m_nonAccessMemoryOffset <= m_messageMapSize)
 					{
 						p_header.msgConfig = 0;
-						PrintDebug("***   MSG Config (CAN WRITE NORMALLY)");
+						PrintDebug("MSG Config (CAN WRITE NORMALLY)");
 						return 1;
 					}
 					else if (m_localHead + sizeof(MessageHeader) <= m_messageMapSize && MakeMultiple(p_header.byteSize) + m_nonAccessMemoryOffset <= m_localTail)
 					{
-						PrintDebug("***   MSG Config (CAN WRITE WITH SPLIT)");
+						PrintDebug("MSG Config (CAN WRITE WITH SPLIT)");
 						size_t tempTotal;
 						p_header.msgConfig = 1;
 						tempTotal = MakeMultiple(p_header.byteSize);
@@ -457,11 +457,11 @@ namespace DoremiEditor
 					if (p_header.byteTotal + m_localHead + m_nonAccessMemoryOffset <= m_localTail)
 					{
 						p_header.msgConfig = 0;
-						PrintDebug("***   MSG Config (CAN WRITE NORMALLY)");
+						PrintDebug("MSG Config (CAN WRITE NORMALLY)");
 						return 1;
 					}
 				}
-				PrintDebug("***   MSG Config (CANNOT WRITE)");
+				PrintDebug("MSG Config (CANNOT WRITE)");
 				return o_config;
 			}
 			catch (...)

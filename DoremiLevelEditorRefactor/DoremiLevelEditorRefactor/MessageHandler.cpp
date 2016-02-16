@@ -34,32 +34,45 @@ namespace DoremiEditor
 			m_filemapping = ApplicationContext::GetInstance().GetFilemapping();
 		
 		}
-		void MessageHandler::AddMessage(const std::string p_nodeName, const NodeType p_nodeType, const MessageType p_messageType, const std::string p_secondName)
+		bool MessageHandler::AddMessage(const std::string p_nodeName, const NodeType p_nodeType, const MessageType p_messageType, const std::string p_secondName)
 		{
 			try
 			{
+				bool result =  false;
 				switch (p_messageType)
 				{
 				case (MessageType::msgAdded) :
-					SendInstantMessage(p_nodeName, p_nodeType, p_messageType, p_secondName);
+					if (SendInstantMessage(p_nodeName, p_nodeType, p_messageType, p_secondName))
+					{
+						result = true;
+					}
 					break;
 				case (MessageType::msgEdited) :
 					AddDelayedMessage(p_nodeName, p_nodeType, p_messageType, p_secondName);
+					result = true;
 					break;
 				case (MessageType::msgSwitched) :
-					AddDelayedMessage(p_nodeName, p_nodeType, p_messageType, p_secondName);
+					if (SendInstantMessage(p_nodeName, p_nodeType, p_messageType, p_secondName))
+					{
+						result = true;
+					}
 					break;
 				case (MessageType::msgRenamed) :
 					RemoveMessage(p_nodeName);
-					SendInstantMessage(p_nodeName, p_nodeType, p_messageType, p_secondName);
-					
+					if (SendInstantMessage(p_nodeName, p_nodeType, p_messageType, p_secondName))
+					{
+						result = true;
+					}
 					break;
 				case (MessageType::msgDeleted) :
 					RemoveMessage(p_nodeName);
-					SendInstantMessage(p_nodeName, p_nodeType, p_messageType, p_secondName);
+					if (SendInstantMessage(p_nodeName, p_nodeType, p_messageType, p_secondName))
+					{
+						result = true;
+					}
 					break;
 				}
-				
+				return result;
 			}
 			catch (...)
 			{
@@ -94,6 +107,7 @@ namespace DoremiEditor
 			try
 			{
 				MessageInfo t_messageInfo;
+				bool t_addToVector = false;
 				t_messageInfo.nodeName = p_nodeName;
 				t_messageInfo.nodeType = p_nodeType;
 				t_messageInfo.msgType = p_messageType;
@@ -101,20 +115,39 @@ namespace DoremiEditor
 				switch (p_nodeType)
 				{
 				case (NodeType::nTransform) :
-					m_filemapping->TrySendTransform(t_messageInfo);
+					if (!m_filemapping->TrySendTransform(t_messageInfo))
+					{
+						t_addToVector = true;
+					}
 					break;
 				case (NodeType::nMesh) :
-					m_filemapping->TrySendMesh(t_messageInfo);
+					if (!m_filemapping->TrySendMesh(t_messageInfo))
+					{
+						t_addToVector = true;
+					}
 					break;
 				case (NodeType::nCamera) :
-					
+					if (!m_filemapping->TrySendCamera(t_messageInfo))
+					{
+						t_addToVector = true;
+					}
 					break;
 				case (NodeType::nLight) :
-					
+					if (!m_filemapping->TrySendLight(t_messageInfo))
+					{
+						t_addToVector = true;
+					}
 					break;
 				case (NodeType::nMaterial) :
-					
+					if (!m_filemapping->TrySendMaterial(t_messageInfo))
+					{
+						t_addToVector = true;
+					}
 					break;
+				}
+				if (t_addToVector)
+				{
+					AddDelayedMessage(t_messageInfo.nodeName, t_messageInfo.nodeType, t_messageInfo.msgType,t_messageInfo.oldName);
 				}
 			}
 			catch (...)
@@ -157,6 +190,116 @@ namespace DoremiEditor
 				PrintError(MString() + errorMessage.c_str());
 			}
 		}
+		bool MessageHandler::SendDelayedMessages()
+		{
+			try
+			{
+				bool result = false;
+				bool t_run = true;
+				//Transfer vector to queue
+				for (std::vector<MessageInfo>::size_type i = 0; i < m_msgVector.size(); ++i)
+				{
+					m_msgQueue.push(m_msgVector.at(i));
+				}
+				m_msgVector.clear();
+				//Loop through queue and send messages accordingly. If a message is unable to be sent, the process is canceled
+				if (m_filemapping->GetFilemapStatus())
+				{
+					while (!m_msgQueue.empty() && t_run == true)
+					{
+						if (m_msgQueue.front().msgType == MessageType::msgDeleted || m_msgQueue.front().msgType == MessageType::msgRenamed)
+						{
+							if (m_filemapping->TrySendRenameDelete(m_msgQueue.front()))
+							{
+								m_msgQueue.pop();
+								result = true;
+							}
+							else
+							{
+								t_run = false;
+							}
+						}
+						else
+						{
+							switch (m_msgQueue.front().nodeType)
+							{
+							case NodeType::nTransform:
+								if (m_filemapping->TrySendTransform(m_msgQueue.front()))
+								{
+									m_msgQueue.pop();
+									result = true;
+								}
+								else
+								{
+									t_run = false;
+								}
+								break;
+							case NodeType::nMesh:
+								if (m_filemapping->TrySendMesh(m_msgQueue.front()))
+								{
+									m_msgQueue.pop();
+									result = true;
+								}
+								else
+								{
+									t_run = false;
+								}
+								break;
+							case NodeType::nCamera:
+								if (m_filemapping->TrySendCamera(m_msgQueue.front()))
+								{
+									m_msgQueue.pop();
+									result = true;
+								}
+								else
+								{
+									t_run = false;
+								}
+								break;
+							case NodeType::nLight:
+								if (m_filemapping->TrySendLight(m_msgQueue.front()))
+								{
+									m_msgQueue.pop();
+									result = true;
+								}
+								else
+								{
+									t_run = false;
+								}
+								break;
+							case NodeType::nMaterial:
+								if (m_filemapping->TrySendMaterial(m_msgQueue.front()))
+								{
+									m_msgQueue.pop();
+									result = true;
+								}
+								else
+								{
+									t_run = false;
+								}
+								break;
+							}
+						}
+						
+					}
+					// If not all messages was able to be sent, repopulate vector from queue.
+					if (!m_msgQueue.empty() && t_run == false)
+					{
+						while (!m_msgQueue.empty())
+						{
+							m_msgVector.push_back(m_msgQueue.front());
+							m_msgQueue.pop();
+						}
+					}
+				}
+				return result;
+			}
+			catch (...)
+			{
+				const std::string errorMessage = std::string("Catch: " + std::string(__FUNCTION__));
+				PrintError(MString() + errorMessage.c_str());
+			}
+		}
 		void MessageHandler::PrintVectorInfo(bool p_printMessages)
 		{
 			try
@@ -184,6 +327,6 @@ namespace DoremiEditor
 				PrintError(MString() + errorMessage.c_str());
 			}
 		}
-}
-
+	}
+	
 }

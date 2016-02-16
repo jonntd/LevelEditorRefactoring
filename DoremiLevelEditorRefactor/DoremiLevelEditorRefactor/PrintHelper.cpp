@@ -1,5 +1,6 @@
 #include "PrintHelper.hpp"
 #include "ApplicationContext.hpp"
+#include "MessageHandler.hpp"
 namespace DoremiEditor
 {
 	namespace Plugin
@@ -27,6 +28,19 @@ namespace DoremiEditor
 
 			}
 		}
+		void PrintMessage(MessageHeader p_header, std::string p_nodeName, std::string p_otherName)
+		{
+			if (ApplicationContext::GetInstance().GetDebugStatus())
+			{
+				MString o_string = "[DRM Message] ";
+				o_string += ApplicationContext::GetInstance().GetMessageHandler()->m_nodeTypes[p_header.nodeType].c_str();
+				o_string += " " + MString(ApplicationContext::GetInstance().GetMessageHandler()->m_msgTypes[p_header.messageType].c_str());
+				o_string += " || " + MString(p_nodeName.c_str());
+				o_string += " || " + MString(p_otherName.c_str());
+				MGlobal::displayInfo(o_string);
+			}
+		}
+
 		MString GetNameStrings(const std::string p_name1, const std::string p_name2) 
 		{
 			MString str = (" ( " + MString(p_name1.c_str()) + " ) -> ( " + MString(p_name2.c_str()) + " ) ");
