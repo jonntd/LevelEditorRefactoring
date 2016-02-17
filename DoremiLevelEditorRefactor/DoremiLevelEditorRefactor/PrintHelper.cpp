@@ -28,15 +28,23 @@ namespace DoremiEditor
 
 			}
 		}
-		void PrintMessage(MessageHeader p_header, std::string p_nodeName, std::string p_otherName)
+		void PrintMessage(MessageHeader p_header, std::string p_nodeName, std::string p_otherName, int p_parentCount)
 		{
-			if (ApplicationContext::GetInstance().GetDebugStatus())
+			if (!ApplicationContext::GetInstance().GetDebugStatus())
 			{
 				MString o_string = "[DRM Message] ";
 				o_string += ApplicationContext::GetInstance().GetMessageHandler()->m_nodeTypes[p_header.nodeType].c_str();
 				o_string += " " + MString(ApplicationContext::GetInstance().GetMessageHandler()->m_msgTypes[p_header.messageType].c_str());
 				o_string += " || " + MString(p_nodeName.c_str());
-				o_string += " || " + MString(p_otherName.c_str());
+				if (p_parentCount != 0 && p_otherName != "")
+				{
+					o_string += " || Parent Count: " + MString() + p_parentCount;
+				}
+				else if (p_parentCount == 0 && p_otherName != "")
+				{
+					o_string += " || Parent Count: 1*";
+				}
+				o_string += +" || " + MString(p_otherName.c_str());
 				MGlobal::displayInfo(o_string);
 			}
 		}

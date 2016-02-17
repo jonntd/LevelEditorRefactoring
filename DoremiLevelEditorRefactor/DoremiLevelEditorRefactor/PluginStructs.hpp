@@ -80,13 +80,38 @@ namespace DoremiEditor
 			bool isBBox;
 			bool isCollider;
 			bool isInteractable;
-			float interactIntervalX;
-			float interactIntervalY;
-			float interactIntervalZ;
-			int typeSpawner;
-			int typeCheckPoint;
-			int typeStartEnd;
+			int checkPointID;
+			int spawnPointID;
+			int startOrEndPoint;
 			bool isAIground;
+
+			bool frequencyAffected;
+			float interactableRange;
+			float3 interactableStartPos;
+			float3 interactableEndPos;
+			float2 interactableOffset;
+			float interactableStartSpeed;
+			float interactableEndSpeed;
+			bool isPotentialFieldCollidable;
+			int potentialFieldID;
+			int potentialFieldNeighbour1;
+			int potentialFieldNeighbour2;
+			int potentialFieldNeighbour3;
+			int potentialFieldNeighbour4;
+			int potentialFieldNeighbour5;
+
+			bool isSpawner;
+			int spawnMax;
+			int spawnMaxAlive;
+			int spawnTypeBlueprint;
+			float spawnFrequency;
+
+			bool isStatic;
+			int physicsType;
+
+			int typeBlueprint;
+
+			bool isDangerous;
 		};
 
 		struct AttributeDescription

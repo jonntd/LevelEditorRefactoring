@@ -36,11 +36,11 @@ namespace DoremiEditor
 
 						// Fill Matrix data
 						MTransformationMatrix t_transformMatrix = t_dagPath.inclusiveMatrix(&result);
-						MVector t_translation = t_transformMatrix.getTranslation(MSpace::kTransform, &result);
+						MVector t_translation = t_transformMatrix.getTranslation(MSpace::kWorld, &result);
 						double t_rotations[4];
 						double t_scale[3];
 						t_transformMatrix.getRotationQuaternion(t_rotations[0], t_rotations[1], t_rotations[2], t_rotations[3]);
-						t_transformMatrix.getScale(t_scale, MSpace::kTransform);
+						t_transformMatrix.getScale(t_scale, MSpace::kWorld);
 
 						o_data.data.translation[0] = t_translation.x;
 						o_data.data.translation[1] = t_translation.y;
@@ -55,28 +55,85 @@ namespace DoremiEditor
 						o_data.data.scale[1] = t_scale[1];
 						o_data.data.scale[2] = t_scale[2];
 
-						MPlug t_plug = t_transform.findPlug("drmRender");
-						t_plug.getValue(o_data.data.attributes.isRendered);
-						t_plug = t_transform.findPlug("drmBBox");
-						t_plug.getValue(o_data.data.attributes.isBBox);
-						t_plug = t_transform.findPlug("drmCollidable");
-						t_plug.getValue(o_data.data.attributes.isCollider);
-						t_plug = t_transform.findPlug("drmAIground");
-						t_plug.getValue(o_data.data.attributes.isAIground);
-						t_plug = t_transform.findPlug("drmInteractable");
-						t_plug.getValue(o_data.data.attributes.isInteractable);
-						t_plug = t_transform.findPlug("drmInteractIntevalX");
-						t_plug.getValue(o_data.data.attributes.interactIntervalX);
-						t_plug = t_transform.findPlug("drmInteractIntevalY");
-						t_plug.getValue(o_data.data.attributes.interactIntervalY);
-						t_plug = t_transform.findPlug("drmInteractIntevalZ");
-						t_plug.getValue(o_data.data.attributes.interactIntervalZ);
-						t_plug = t_transform.findPlug("drmSpawner");
-						t_plug.getValue(o_data.data.attributes.typeSpawner);
-						t_plug = t_transform.findPlug("drmCheckPoint");
-						t_plug.getValue(o_data.data.attributes.typeCheckPoint);
-						t_plug = t_transform.findPlug("drmLevelStartEnd");
-						t_plug.getValue(o_data.data.attributes.typeStartEnd);
+						MPlug tempPlug = t_transform.findPlug("drmRender");
+						tempPlug.getValue(o_data.data.attributes.isRendered);
+						tempPlug = t_transform.findPlug("drmBBox");
+						tempPlug.getValue(o_data.data.attributes.isBBox);
+						tempPlug = t_transform.findPlug("drmCollidable");
+						tempPlug.getValue(o_data.data.attributes.isCollider);
+						tempPlug = t_transform.findPlug("drmInteractable");
+						tempPlug.getValue(o_data.data.attributes.isInteractable);
+						tempPlug = t_transform.findPlug("drmCheckPointID");
+						tempPlug.getValue(o_data.data.attributes.checkPointID);
+						tempPlug = t_transform.findPlug("drmSpawnPointID");
+						tempPlug.getValue(o_data.data.attributes.spawnPointID);
+						tempPlug = t_transform.findPlug("drmLevelStartEnd");
+						tempPlug.getValue(o_data.data.attributes.startOrEndPoint);
+						tempPlug = t_transform.findPlug("drmAIground");
+						tempPlug.getValue(o_data.data.attributes.isAIground);
+
+						tempPlug = t_transform.findPlug("drmFrequencyAffected");
+						tempPlug.getValue(o_data.data.attributes.frequencyAffected);
+						tempPlug = t_transform.findPlug("drmInteractableRange");
+						tempPlug.getValue(o_data.data.attributes.interactableRange);
+
+						tempPlug = t_transform.findPlug("drmInteractableStartPosX");
+						tempPlug.getValue(o_data.data.attributes.interactableStartPos[0]);
+						tempPlug = t_transform.findPlug("drmInteractableStartPosY");
+						tempPlug.getValue(o_data.data.attributes.interactableStartPos[1]);
+						tempPlug = t_transform.findPlug("drmInteractableStartPosZ");
+						tempPlug.getValue(o_data.data.attributes.interactableStartPos[2]);
+						tempPlug = t_transform.findPlug("drmInteractableEndPosX");
+						tempPlug.getValue(o_data.data.attributes.interactableEndPos[0]);
+						tempPlug = t_transform.findPlug("drmInteractableEndPosY");
+						tempPlug.getValue(o_data.data.attributes.interactableEndPos[1]);
+						tempPlug = t_transform.findPlug("drmInteractableEndPosZ");
+						tempPlug.getValue(o_data.data.attributes.interactableEndPos[2]);
+						tempPlug = t_transform.findPlug("drmInteractableOffsetX");
+						tempPlug.getValue(o_data.data.attributes.interactableOffset[0]);
+						tempPlug = t_transform.findPlug("drmInteractableOffsetY");
+						tempPlug.getValue(o_data.data.attributes.interactableOffset[1]);
+
+						tempPlug = t_transform.findPlug("drmInteractableStartSpeed");
+						tempPlug.getValue(o_data.data.attributes.interactableStartSpeed);
+						tempPlug = t_transform.findPlug("drmInteractableEndSpeed");
+						tempPlug.getValue(o_data.data.attributes.interactableStartSpeed);
+
+						tempPlug = t_transform.findPlug("drmIsPotentialFieldCollidable");
+						tempPlug.getValue(o_data.data.attributes.isPotentialFieldCollidable);
+						tempPlug = t_transform.findPlug("drmPotentialFieldID");
+						tempPlug.getValue(o_data.data.attributes.potentialFieldID);
+						tempPlug = t_transform.findPlug("drmPotentialFieldNeighbour1");
+						tempPlug.getValue(o_data.data.attributes.potentialFieldNeighbour1);
+						tempPlug = t_transform.findPlug("drmPotentialFieldNeighbour2");
+						tempPlug.getValue(o_data.data.attributes.potentialFieldNeighbour2);
+						tempPlug = t_transform.findPlug("drmPotentialFieldNeighbour3");
+						tempPlug.getValue(o_data.data.attributes.potentialFieldNeighbour3);
+						tempPlug = t_transform.findPlug("drmPotentialFieldNeighbour4");
+						tempPlug.getValue(o_data.data.attributes.potentialFieldNeighbour4);
+						tempPlug = t_transform.findPlug("drmPotentialFieldNeighbour5");
+						tempPlug.getValue(o_data.data.attributes.potentialFieldNeighbour5);
+
+						tempPlug = t_transform.findPlug("drmIsSpawner");
+						tempPlug.getValue(o_data.data.attributes.isSpawner);
+						tempPlug = t_transform.findPlug("drmSpawnsMax");
+						tempPlug.getValue(o_data.data.attributes.spawnMax);
+						tempPlug = t_transform.findPlug("drmSpawnsMaxAlive");
+						tempPlug.getValue(o_data.data.attributes.spawnMaxAlive);
+						tempPlug = t_transform.findPlug("drmSpawnTypeBlueprint");
+						tempPlug.getValue(o_data.data.attributes.spawnTypeBlueprint);
+						tempPlug = t_transform.findPlug("drmSpawnFrequency");
+						tempPlug.getValue(o_data.data.attributes.spawnFrequency);
+
+						tempPlug = t_transform.findPlug("drmIsStatic");
+						tempPlug.getValue(o_data.data.attributes.isStatic);
+						tempPlug = t_transform.findPlug("drmPhysicsType");
+						tempPlug.getValue(o_data.data.attributes.physicsType);
+
+						tempPlug = t_transform.findPlug("drmTypeBlueprint");
+						tempPlug.getValue(o_data.data.attributes.typeBlueprint);
+						tempPlug = t_transform.findPlug("drmIsDangerous");
+						tempPlug.getValue(o_data.data.attributes.isDangerous);
 
 						if (ApplicationContext::GetInstance().GetDebugStatus())
 						{

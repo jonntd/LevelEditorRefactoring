@@ -112,39 +112,50 @@ namespace DoremiEditor
 				t_messageInfo.nodeType = p_nodeType;
 				t_messageInfo.msgType = p_messageType;
 				t_messageInfo.oldName = p_secondName;
-				switch (p_nodeType)
+				if (p_messageType == MessageType::msgDeleted || p_messageType == MessageType::msgRenamed)
 				{
-				case (NodeType::nTransform) :
-					if (!m_filemapping->TrySendTransform(t_messageInfo))
+					if (!m_filemapping->TrySendRenameDelete(t_messageInfo))
 					{
 						t_addToVector = true;
 					}
-					break;
-				case (NodeType::nMesh) :
-					if (!m_filemapping->TrySendMesh(t_messageInfo))
-					{
-						t_addToVector = true;
-					}
-					break;
-				case (NodeType::nCamera) :
-					if (!m_filemapping->TrySendCamera(t_messageInfo))
-					{
-						t_addToVector = true;
-					}
-					break;
-				case (NodeType::nLight) :
-					if (!m_filemapping->TrySendLight(t_messageInfo))
-					{
-						t_addToVector = true;
-					}
-					break;
-				case (NodeType::nMaterial) :
-					if (!m_filemapping->TrySendMaterial(t_messageInfo))
-					{
-						t_addToVector = true;
-					}
-					break;
 				}
+				else
+				{
+					switch (p_nodeType)
+					{
+					case (NodeType::nTransform) :
+						if (!m_filemapping->TrySendTransform(t_messageInfo))
+						{
+							t_addToVector = true;
+						}
+												break;
+					case (NodeType::nMesh) :
+						if (!m_filemapping->TrySendMesh(t_messageInfo))
+						{
+							t_addToVector = true;
+						}
+										   break;
+					case (NodeType::nCamera) :
+						if (!m_filemapping->TrySendCamera(t_messageInfo))
+						{
+							t_addToVector = true;
+						}
+											 break;
+					case (NodeType::nLight) :
+						if (!m_filemapping->TrySendLight(t_messageInfo))
+						{
+							t_addToVector = true;
+						}
+											break;
+					case (NodeType::nMaterial) :
+						if (!m_filemapping->TrySendMaterial(t_messageInfo))
+						{
+							t_addToVector = true;
+						}
+											   break;
+					}
+				}
+				
 				if (t_addToVector)
 				{
 					AddDelayedMessage(t_messageInfo.nodeName, t_messageInfo.nodeType, t_messageInfo.msgType,t_messageInfo.oldName);

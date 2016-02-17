@@ -115,6 +115,59 @@ namespace DoremiEditor
 				PrintError(MString() + errorMessage.c_str());
 			}
 		}
+		void CallbackHandler::UnloadScene(bool p_doTransforms, bool p_doMeshes, bool p_doCameras, bool p_doLights, bool p_doMaterials)
+		{
+			try
+			{
+				MStatus result;
+				if (p_doLights)
+				{
+					for (std::vector<LightInfo>::size_type i = 0; i < s_nodeHandler->m_lightVector.size(); ++i)
+					{
+						s_messageHandler->AddMessage(s_nodeHandler->m_lightVector.at(i).nodeName, NodeType::nLight, MessageType::msgDeleted);
+					}
+					s_nodeHandler->m_lightVector.clear();
+				}
+				if (p_doCameras)
+				{
+					for (std::vector<CameraInfo>::size_type i = 0; i < s_nodeHandler->m_cameraVector.size(); ++i)
+					{
+						s_messageHandler->AddMessage(s_nodeHandler->m_cameraVector.at(i).nodeName, NodeType::nCamera, MessageType::msgDeleted);
+					}
+					s_nodeHandler->m_cameraVector.clear();
+				}
+				if (p_doMeshes)
+				{
+					for (std::vector<MeshInfo>::size_type i = 0; i < s_nodeHandler->m_meshVector.size(); ++i)
+					{
+						s_messageHandler->AddMessage(s_nodeHandler->m_meshVector.at(i).nodeName, NodeType::nMesh, MessageType::msgDeleted);
+					}
+					s_nodeHandler->m_meshVector.clear();
+				}
+				if (p_doTransforms)
+				{
+					for (std::vector<TransformInfo>::size_type i = 0; i < s_nodeHandler->m_transformVector.size(); ++i)
+					{
+						s_messageHandler->AddMessage(s_nodeHandler->m_transformVector.at(i).nodeName, NodeType::nTransform, MessageType::msgDeleted);
+					}
+					s_nodeHandler->m_transformVector.clear();
+				}
+				if (p_doMaterials)
+				{
+					for (std::vector<MaterialInfo>::size_type i = 0; i < s_nodeHandler->m_materialVector.size(); ++i)
+					{
+						s_messageHandler->AddMessage(s_nodeHandler->m_materialVector.at(i).nodeName, NodeType::nMaterial, MessageType::msgDeleted);
+					}
+					s_nodeHandler->m_materialVector.clear();
+				}
+			}
+			catch (...)
+			{
+				const std::string errorMessage = std::string("Cath: " + std::string(__FUNCTION__));
+				PrintError(MString() + errorMessage.c_str());
+			}
+		}
+
 		void CallbackHandler::cb_newNode(MObject& p_node, void* p_clientData)
 		{
 			try
@@ -248,7 +301,7 @@ namespace DoremiEditor
 					}
 					else
 					{
-
+						s_nodeHandler->NodeNameChangeMesh(t_mesh, t_oldName);
 					}
 				}
 				else if (p_node.hasFn(MFn::kCamera))
@@ -262,8 +315,11 @@ namespace DoremiEditor
 					PrintDebug("Light name change ( " + MString(t_oldName.c_str()) + " ) to (" + MString(t_newName.c_str()) + ") ");
 					if (t_oldName.find("__PrenotatoPerDuplicare") != std::string::npos && t_newName.length() >0)
 					{
-
 						AddLight(p_node, false);
+					}
+					else
+					{
+						s_nodeHandler->NodeNameChangeLight(t_light, t_oldName);
 					}
 				}
 				else if (p_node.hasFn(MFn::kLambert))
@@ -324,16 +380,21 @@ namespace DoremiEditor
 				MFnMesh t_mesh(plug_1.node(), &result);
 				if (result)
 				{
+					bool exists = false;
+					//for (std::vector<MeshInfo>::size_type i = 0; i<s_nodeHandler->m_mesh)
 					// Might have to put a check if this node exists in the mesh vector
-					std::string t_plugName = plug_1.name().asChar();
-					if (t_plugName.find("pnts") != std::string::npos && t_plugName.find("[") != std::string::npos)
+					if (s_nodeHandler->FindSavedMesh(t_mesh.name().asChar()))
 					{
-						s_messageHandler->AddMessage(t_mesh.name().asChar(), NodeType::nMesh, MessageType::msgEdited);
-					}
-					else if (plug_2.node().apiType() == MFn::Type::kShadingEngine)
-					{
-						s_messageHandler->AddMessage(t_mesh.name().asChar(), NodeType::nMesh, MessageType::msgEdited);
-						PrintDebug(t_mesh.name() + " Mesh message to be added (shading engine changed)");
+						std::string t_plugName = plug_1.name().asChar();
+						if (t_plugName.find("pnts") != std::string::npos && t_plugName.find("[") != std::string::npos)
+						{
+							s_messageHandler->AddMessage(t_mesh.name().asChar(), NodeType::nMesh, MessageType::msgEdited);
+						}
+						else if (plug_2.node().apiType() == MFn::Type::kShadingEngine)
+						{
+							s_messageHandler->AddMessage(t_mesh.name().asChar(), NodeType::nMesh, MessageType::msgEdited);
+							PrintDebug(t_mesh.name() + " Mesh message to be added (shading engine changed)");
+						}
 					}
 				}
 			}
@@ -383,6 +444,26 @@ namespace DoremiEditor
 							|| t_plugName.find(".drm") != std::string::npos)
 						{
 							s_messageHandler->AddMessage(t_transform.name().asChar(), NodeType::nTransform, MessageType::msgEdited, "");
+							if (t_transform.childCount() > 0)
+							{
+								
+								MFn::Type filter = MFn::kTransform;
+								MFnDagNode t_dagNodeRoot(plug_1.node());
+								MDagPath t_dagPathRoot;
+								t_dagNodeRoot.getPath(t_dagPathRoot);
+								MItDag t_dagIterator(MItDag::kDepthFirst, filter, &result);
+								t_dagIterator.reset(t_dagPathRoot);
+				
+								for (; !t_dagIterator.isDone(); t_dagIterator.next())
+								{
+								
+									MFnTransform t_childTransform(t_dagIterator.currentItem(), &result);
+									if (result)
+									{
+										s_messageHandler->AddMessage(t_childTransform.name().asChar(), NodeType::nTransform, MessageType::msgEdited);
+									}
+								}
+							}
 						}
 					}
 				}
@@ -473,40 +554,43 @@ namespace DoremiEditor
 				bool sendMsg = false;
 				std::string lightName(t_light.name().asChar());
 				std::string plugName(plug_1.name().asChar());
-
-				if (p_msg & MNodeMessage::AttributeMessage::kAttributeSet && p_msg != 2052)
+				if (s_nodeHandler->FindSavedLight(lightName))
 				{
-					MStatus result;
-					if (plugName.find(".intensity") != std::string::npos)
+					if (p_msg & MNodeMessage::AttributeMessage::kAttributeSet && p_msg != 2052)
 					{
-						sendMsg = true;
-					}
-					else if (plugName.find(".color") != std::string::npos)
-					{
-						sendMsg = true;
-					}
-					else if (plugName.find(".decayRate") != std::string::npos)
-					{
-						sendMsg = true;
-					}
-					else if (plugName.find(".coneAngle") != std::string::npos)
-					{
-						sendMsg = true;
-					}
-					else if (plugName.find(".dropOff") != std::string::npos)
-					{
-						sendMsg = true;
-					}
-					else if (plugName.find(".penumbraAngle") != std::string::npos)
-					{
-						sendMsg = true;
+						MStatus result;
+						if (plugName.find(".intensity") != std::string::npos)
+						{
+							sendMsg = true;
+						}
+						else if (plugName.find(".color") != std::string::npos)
+						{
+							sendMsg = true;
+						}
+						else if (plugName.find(".decayRate") != std::string::npos)
+						{
+							sendMsg = true;
+						}
+						else if (plugName.find(".coneAngle") != std::string::npos)
+						{
+							sendMsg = true;
+						}
+						else if (plugName.find(".dropOff") != std::string::npos)
+						{
+							sendMsg = true;
+						}
+						else if (plugName.find(".penumbraAngle") != std::string::npos)
+						{
+							sendMsg = true;
 
-					}
-					if (sendMsg)
-					{
-						//FileMapping::printInfo(MString(plugName.c_str()) + "    " + plug_1.node().apiTypeStr() + "  " + msg);
-						PrintDebug(t_light.name() + " light attribute changed, message to be added!");
-					}
+						}
+						if (sendMsg)
+						{
+							s_messageHandler->AddMessage(lightName, NodeType::nLight, MessageType::msgEdited);
+							//PrintDebug(t_light.name() + " light attribute changed, message to be added!");
+						}
+				}
+				
 				}
 			}
 			catch (...)

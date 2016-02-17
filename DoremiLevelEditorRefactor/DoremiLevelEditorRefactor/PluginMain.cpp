@@ -4,6 +4,8 @@
 #include "MessageHandler.hpp"
 #include "CallbackHandler.hpp"
 #include "CmdFileMapToggle.hpp"
+#include "CmdLoadScene.hpp"
+#include "CmdUnloadScene.hpp"
 #include "Filemapping.hpp"
 #include <iostream>
 
@@ -29,10 +31,12 @@ EXPORT MStatus initializePlugin(MObject obj)
 
 		
 		DoremiEditor::Plugin::ApplicationContext::GetInstance().InitializeClasses();
-		DoremiEditor::Plugin::ApplicationContext::GetInstance().GetFilemapping()->CreateFilemaps();
+		//DoremiEditor::Plugin::ApplicationContext::GetInstance().GetFilemapping()->CreateFilemaps();
 		DoremiEditor::Plugin::ApplicationContext::GetInstance().GetCallbackHandler()->LoadScene();
 		
 		myPlugin.registerCommand("drmToggleFilemaps", DoremiEditor::Plugin::Commands::CmdFileMapToggle::creator);
+		myPlugin.registerCommand("drmLoadScene", DoremiEditor::Plugin::Commands::CmdLoadScene::creator);
+		myPlugin.registerCommand("drmUnloadScene", DoremiEditor::Plugin::Commands::CmdUnloadScene::creator);
 		//nhandle->TestFunction();
 	}
 	catch (...)

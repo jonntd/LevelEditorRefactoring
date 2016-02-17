@@ -34,6 +34,7 @@ namespace DoremiEditor
 			Function for loading and adding callbacks and functionality to existing nodes in a scene
 			*/
 			static void LoadScene();
+			static void UnloadScene(bool p_doTransforms = true, bool p_doMeshes = true, bool p_doCameras = true, bool p_doLights = true, bool p_doMaterials = true);
 
 			/**
 			AFFECTS: All nodes

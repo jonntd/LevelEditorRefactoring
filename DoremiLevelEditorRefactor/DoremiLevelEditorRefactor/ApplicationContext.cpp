@@ -27,7 +27,7 @@ namespace DoremiEditor
 		}
 		ApplicationContext::ApplicationContext()
 		{
-			m_debugMode = true;
+			m_debugMode = false;
 			m_nodeHandler = new NodeHandler;
 			m_callbackHandler = new CallbackHandler;
 			m_messageHandler = new MessageHandler;

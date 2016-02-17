@@ -57,6 +57,12 @@
     <ClInclude Include="Mutex.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="CmdLoadScene.hpp">
+      <Filter>Header Files\Commands</Filter>
+    </ClInclude>
+    <ClInclude Include="CmdUnloadScene.hpp">
+      <Filter>Header Files\Commands</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="PluginMain.cpp">
@@ -85,6 +91,12 @@
     </ClCompile>
     <ClCompile Include="Filemapping.cpp">
       <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="CmdLoadScene.cpp">
+      <Filter>Source Files\Commands</Filter>
+    </ClCompile>
+    <ClCompile Include="CmdUnloadScene.cpp">
+      <Filter>Source Files\Commands</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

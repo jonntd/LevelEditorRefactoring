@@ -11,7 +11,7 @@ namespace DoremiEditor
 		void PrintError(MString p_str);
 		void PrintWarning(MString p_str);
 		void PrintDebug(MString p_str);
-		void PrintMessage(MessageHeader p_header, std::string p_nodeName, std::string p_otherName = "");
+		void PrintMessage(MessageHeader p_header, std::string p_nodeName, std::string p_otherName = "", int p_parentCount = 0);
 		MString GetNameStrings(const std::string p_name1, const std::string p_name2);
 	}
 }

@@ -17,13 +17,18 @@ namespace DoremiEditor
 		}
 		Filemapping::~Filemapping()
 		{
-			CloseFilemaps();
+			if (m_isActive)
+			{
+				CloseFilemaps();
+			}
+			
 		}
 
 		void Filemapping::CreateFilemaps(size_t p_filemapSize)
 		{
 			try
 			{
+				PrintWarning("REACHED FILEMAP CREATION FUNCTION");
 				m_messageBuilder = ApplicationContext::GetInstance().GetMessageBuilder();
 				m_mutex.Create("__info_Mutex__");
 				SECURITY_ATTRIBUTES security;
@@ -47,7 +52,7 @@ namespace DoremiEditor
 				if (GetLastError() == ERROR_ALREADY_EXISTS) {
 					PrintInfo("Infofilemap exists, you get a handle to it!");
 					GetInfoMapValues();
-					m_isActive = true;
+					//m_isActive = true;
 					if (p_filemapSize != 0)
 					{
 						SetInfoMapValues(0, 0, 256, p_filemapSize);
@@ -56,7 +61,7 @@ namespace DoremiEditor
 				}
 				else { //first, sätter de första värdena på filemapinfon
 					PrintWarning("Info filemap not found. Creating new (Warning, not recommended)");
-					m_isActive = true;
+					//m_isActive = true;
 					SetInfoMapValues(0, 0, 256, 1024 * 1024);
 				}
 
@@ -78,15 +83,15 @@ namespace DoremiEditor
 				}
 				if (GetLastError() == ERROR_ALREADY_EXISTS) {
 					PrintInfo("Filemap exists, you get a handle to it!");
-					m_isActive = true;
+					//m_isActive = true;
 
 				}
 				else {
 					PrintInfo("Could not find Message Filemap! Creating new (Warning, not recommended)");
-					m_isActive = true;
+					//m_isActive = true;
 				}
 
-
+				m_isActive = true;
 				PrintInfo("FileMapSize: " + MString() + m_infoMapSize + " " + MString() + m_fileMapInfoStructured.non_accessmemoryOffset);
 				PrintInfo("***** FILEMAP LOADED *****");
 			}
@@ -107,7 +112,7 @@ namespace DoremiEditor
 				}
 				if (result != 0)
 				{
-					PrintInfo("Filemap closed");
+					PrintInfo("Message Filemap closed");
 				}
 				result = CloseHandle(f_messageFilemap);
 				if (GetLastError() != 0)
@@ -116,7 +121,7 @@ namespace DoremiEditor
 				}
 				if (result != 0)
 				{
-					PrintInfo("Filemap closed");
+					PrintInfo("Message Filemap Handle closed");
 				}
 				result = UnmapViewOfFile((LPCVOID)f_infoMapData);
 				if (GetLastError() != 0)
@@ -125,7 +130,7 @@ namespace DoremiEditor
 				}
 				if (result != 0)
 				{
-					PrintInfo("Filemap closed");
+					PrintInfo("Information Filemap closed");
 				}
 				result = CloseHandle(f_infoFilemap);
 				if (GetLastError() != 0)
@@ -134,9 +139,9 @@ namespace DoremiEditor
 				}
 				if (result != 0)
 				{
-					PrintInfo("Filemap closed");
+					PrintInfo("Information Filemap Handle closed");
 				}
-					
+				m_isActive = false;
 			}
 			catch (...)
 			{
@@ -486,6 +491,7 @@ namespace DoremiEditor
 						TransformMessage t_message = CreateMessageTransform(p_messageInfo);
 						if (SendTransformMessage(t_header, t_message, t_cfg) == true)
 						{
+							PrintMessage(t_header, p_messageInfo.nodeName, t_message.parentName);
 							return true;
 						}
 						else
@@ -521,6 +527,7 @@ namespace DoremiEditor
 						MeshMessage t_message = CreateMessageMesh(p_messageInfo);
 						if (SendMeshMessage(t_header, t_message, t_cfg) == true)
 						{
+							PrintMessage(t_header, p_messageInfo.nodeName, t_message.transformName[0].transformNames, t_message.transformCount);
 							return true;
 						}
 						else
@@ -556,6 +563,7 @@ namespace DoremiEditor
 						CameraMessage t_message = CreateMessageCamera(p_messageInfo);
 						if (SendCameraMessage(t_header, t_message, t_cfg) == true)
 						{
+							PrintMessage(t_header, p_messageInfo.nodeName, t_message.transformName);
 							return true;
 						}
 						else
@@ -591,6 +599,7 @@ namespace DoremiEditor
 						LightMessage t_message = CreateMessageLight(p_messageInfo);
 						if (SendLightMessage(t_header, t_message, t_cfg) == true)
 						{
+							PrintMessage(t_header, p_messageInfo.nodeName, t_message.transformName);
 							return true;
 						}
 						else
@@ -626,6 +635,7 @@ namespace DoremiEditor
 						MaterialMessage t_message = CreateMessageMaterial(p_messageInfo);
 						if (SendMaterialMessage(t_header, t_message, t_cfg) == true)
 						{
+							PrintMessage(t_header, p_messageInfo.nodeName);
 							return true;
 						}
 						else
@@ -661,6 +671,7 @@ namespace DoremiEditor
 						RenameDeleteMessage t_message = CreateMessageRenameDelete(p_messageInfo);
 						if (SendRenameDeleteMessage(t_header, t_message, t_cfg) == true)
 						{
+							PrintMessage(t_header, p_messageInfo.nodeName, p_messageInfo.oldName);
 							return true;
 						}
 						else

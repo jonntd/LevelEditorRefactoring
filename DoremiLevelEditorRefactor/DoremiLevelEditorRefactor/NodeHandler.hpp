@@ -12,14 +12,7 @@ namespace DoremiEditor
 		class NodeHandler
 		{
 		private:
-			/**
-			Vectors for managing loaded objects
-			*/
-			std::vector<TransformInfo>	m_transformVector;
-			std::vector<MeshInfo>		m_meshVector;
-			std::vector<CameraInfo>		m_cameraVector;
-			std::vector<LightInfo>		m_lightVector;
-			std::vector<MaterialInfo>	m_materialVector;
+			
 
 			/**
 			Custom Attribute vector;
@@ -30,9 +23,20 @@ namespace DoremiEditor
 		public:
 			MessageHandler* m_messageHandler =nullptr;
 			MessageBuilder* m_messageBuilder = nullptr;
+			/**
+			Vectors for managing loaded objects
+			*/
+
+			std::vector<TransformInfo>	m_transformVector;
+			std::vector<MeshInfo>		m_meshVector;
+			std::vector<CameraInfo>		m_cameraVector;
+			std::vector<LightInfo>		m_lightVector;
+			std::vector<MaterialInfo>	m_materialVector;
+
 
 			NodeHandler();
 			~NodeHandler();
+
 			void Initialize();
 			void AddCustomAttributesTransform( MFnTransform& p_transform);
 			void AddTransformNode(const MFnTransform& p_transform);
@@ -51,6 +55,11 @@ namespace DoremiEditor
 			void NodeDeletedCamera(const std::string p_nodeName);
 			void NodeDeletedLight(const std::string p_nodeName);
 			void NodeDeletedMaterial(const std::string p_nodeName);
+			bool FindSavedTransform(std::string p_nodeName);
+			bool FindSavedMesh(std::string p_nodeName);
+			bool FindSavedCamera(std::string p_nodeName);
+			bool FindSavedLight(std::string p_nodeName);
+			bool FindSavedMaterial(std::string p_nodeName);
 			void ChangeParentName(MFnTransform& p_transform, const std::string p_oldName);
 			void PrintVectorInfo();
 				
