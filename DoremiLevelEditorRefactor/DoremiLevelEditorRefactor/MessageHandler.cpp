@@ -25,7 +25,7 @@ namespace DoremiEditor
 		}
 		MessageHandler::~MessageHandler()
 		{
-			
+			m_msgVector.clear();
 		}
 		void MessageHandler::Initialize()
 		{
@@ -101,6 +101,20 @@ namespace DoremiEditor
 				PrintError(MString() + errorMessage.c_str());
 			}
 			return true;
+		}
+		void MessageHandler::ClearMessageVectors()
+		{
+			try
+			{
+				m_msgVector.clear();
+				PrintInfo("Message Vectors cleared!");
+			}
+			catch (...)
+			{
+				const std::string errorMessage = std::string("Catch: " + std::string(__FUNCTION__));
+				PrintError(MString() + errorMessage.c_str());
+			}
+			
 		}
 		bool MessageHandler::SendInstantMessage(const std::string p_nodeName, const NodeType p_nodeType, const MessageType p_messageType, const std::string p_secondName)
 		{

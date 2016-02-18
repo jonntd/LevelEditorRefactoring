@@ -27,6 +27,7 @@ namespace DoremiEditor
 			std::vector<std::string>m_nodeTypes;
 			bool AddMessage(const std::string p_nodeName, const NodeType p_nodeType, const MessageType p_messageType, const std::string p_secondName ="");
 			bool RemoveMessage(const std::string p_nodeName);
+			void ClearMessageVectors();
 			bool SendInstantMessage(const std::string p_nodeName, const NodeType p_nodeType, const MessageType p_messageType, const std::string p_secondName = "");
 			void AddDelayedMessage(const std::string p_nodeName, const NodeType p_nodeType, const MessageType p_messageType, const std::string p_secondName = "");
 			void PrintVectorInfo(bool p_printMessages);

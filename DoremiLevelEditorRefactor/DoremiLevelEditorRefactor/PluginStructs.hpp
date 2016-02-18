@@ -70,8 +70,8 @@ namespace DoremiEditor
 		};
 		struct RenameDeleteMessage
 		{
-			char nodeName1[100];
-			char nodeName2[100];
+			char nodeName1[MAX_NAME_SIZE];
+			char nodeName2[MAX_NAME_SIZE];
 		};
 
 		struct CustomAttributes
@@ -144,8 +144,8 @@ namespace DoremiEditor
 		};
 		struct TransformMessage
 		{
-			char nodeName[100];
-			char parentName[100];
+			char nodeName[MAX_NAME_SIZE];
+			char parentName[MAX_NAME_SIZE];
 			TransformData data;
 		};
 		struct MeshData
@@ -181,10 +181,10 @@ namespace DoremiEditor
 		};
 		struct MeshMessage
 		{
-			char nodeName[100];
+			char nodeName[MAX_NAME_SIZE];
 			int transformCount;
 			std::vector<NameStruct> transformName;
-			char materialName[100];
+			char materialName[MAX_NAME_SIZE];
 			int meshID;
 			int materialID;
 			MeshData data;
@@ -205,8 +205,8 @@ namespace DoremiEditor
 		};
 		struct CameraMessage
 		{
-			char nodeName[100];
-			char transformName[100];
+			char nodeName[MAX_NAME_SIZE];
+			char transformName[MAX_NAME_SIZE];
 			CameraData data;
 		};
 		struct MaterialData
@@ -280,8 +280,8 @@ namespace DoremiEditor
 		};
 		struct LightMessage
 		{
-			char nodeName[100];
-			char transformName[100];
+			char nodeName[MAX_NAME_SIZE];
+			char transformName[MAX_NAME_SIZE];
 			LightData data;
 		};
 		struct FilemapInfo {
@@ -290,13 +290,12 @@ namespace DoremiEditor
 			size_t non_accessmemoryOffset; //memory in beginning of file thats no touchy, so that head and tail won't get to each other
 										   //size_t totalConsumers;
 			size_t messageFilemap_Size;
-
+			char outFileName[MAX_NAME_SIZE]; // Export file name
 			FilemapInfo() {
 				head_ByteOffset = 0;
 				tail_ByteOffset = 0;
-				non_accessmemoryOffset = 0;
-				//totalConsumers = 0;
-				messageFilemap_Size = 0; //storleken på filemapen med meddelanden
+				non_accessmemoryOffset = 256;
+				messageFilemap_Size = 1024*1024*10; //storleken på filemapen med meddelanden
 			}
 		};
 	}

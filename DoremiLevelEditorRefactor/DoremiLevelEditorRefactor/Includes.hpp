@@ -52,6 +52,9 @@
  
 // Commands
 #include <maya/MPxCommand.h>
+#include <maya/MArgList.h>
+#include <maya/MSyntax.h>
+#include <maya/MArgDatabase.h>
 
 // Default stuff
 #include <Windows.h>

@@ -19,19 +19,28 @@ namespace DoremiEditor
 			}
 			MStatus CmdFileMapToggle::doIt(const MArgList& args)
 			{
-				//ApplicationContext::GetInstance().GetMessageHandler()->PrintVectorInfo(true);
-				bool status = ApplicationContext::GetInstance().GetFilemapping()->GetFilemapStatus();
-				if (status)
+				try
 				{
-					ApplicationContext::GetInstance().GetFilemapping()->CloseFilemaps();
-					PrintDebug("Filemaps OFF");
+					//ApplicationContext::GetInstance().GetMessageHandler()->PrintVectorInfo(true);
+					bool status = ApplicationContext::GetInstance().GetFilemapping()->GetFilemapStatus();
+					if (status)
+					{
+						PrintDebug("Filemaps OFF");
+						ApplicationContext::GetInstance().GetFilemapping()->CloseFilemaps();
+
+					}
+					else
+					{
+						PrintDebug("Filemaps ON");
+						ApplicationContext::GetInstance().GetFilemapping()->CreateFilemaps();
+					}
+					return MS::kSuccess;
 				}
-				else
+				catch (...)
 				{
-					ApplicationContext::GetInstance().GetFilemapping()->CreateFilemaps();
-					PrintDebug("Filemaps ON");
+					const std::string errorMessage = std::string("Catch: " + std::string(__FUNCTION__));
+					PrintError(MString() + errorMessage.c_str());
 				}
-				return MS::kSuccess;
 			}
 			void* CmdFileMapToggle::creator()
 			{

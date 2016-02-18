@@ -9,66 +9,77 @@ namespace DoremiEditor
 		{
 			m_localHead = 0;
 			m_localTail = 0;
-			m_messageMapSize = 0;
+			m_messageMapSize = 1024*1024*10;
 			m_infoMapSize = 256;
 			m_isActive = false;
 			m_chunkSize = 256;
+			m_outFileName = "drmMapOut";
 			
 		}
 		Filemapping::~Filemapping()
 		{
-			if (m_isActive)
-			{
+			//if (m_isActive)
+			//{
 				CloseFilemaps();
-			}
+			//}
 			
 		}
 
-		void Filemapping::CreateFilemaps(size_t p_filemapSize)
+		void Filemapping::CreateFilemaps(int p_filemapSize)
 		{
 			try
 			{
+				PrintInfo(MString() + m_messageMapSize);
 				PrintWarning("REACHED FILEMAP CREATION FUNCTION");
 				m_messageBuilder = ApplicationContext::GetInstance().GetMessageBuilder();
 				m_mutex.Create("__info_Mutex__");
 				SECURITY_ATTRIBUTES security;
 				security.lpSecurityDescriptor = nullptr;
+
+				// INITIALIZE INFO FILEMAP
+				bool t_infoMapStatus = true;
 				f_infoFilemap = CreateFileMapping(INVALID_HANDLE_VALUE,
 					nullptr,
 					PAGE_READWRITE,
 					(DWORD)0,
 					m_infoMapSize,
 					(LPCWSTR)"Global\\infoFileMap");
-				//hInfoFileMap = OpenFileMapping(FILE_MAP_ALL_ACCESS, FALSE, (LPCWSTR)"infoFileMap");
 
 				f_infoMapData = MapViewOfFile(f_infoFilemap, FILE_MAP_ALL_ACCESS, 0, 0, 0);
-
-
-
-				if (f_infoFilemap == NULL) {
+				if (f_infoFilemap == NULL) 
+				{
 					PrintWarning("Couldn't create infofilemap");
+					t_infoMapStatus = false;
 				}
 
-				if (GetLastError() == ERROR_ALREADY_EXISTS) {
+				if (GetLastError() == ERROR_ALREADY_EXISTS)
+				{
 					PrintInfo("Infofilemap exists, you get a handle to it!");
 					GetInfoMapValues();
-					//m_isActive = true;
 					if (p_filemapSize != 0)
 					{
 						SetInfoMapValues(0, 0, 256, p_filemapSize);
 					}
 					
 				}
-				else { //first, sätter de första värdena på filemapinfon
+				else 
+				{ //first, sätter de första värdena på filemapinfon
 					PrintWarning("Info filemap not found. Creating new (Warning, not recommended)");
 					//m_isActive = true;
-					SetInfoMapValues(0, 0, 256, 1024 * 1024);
+					SetInfoMapValues(0, 0, 256, p_filemapSize);
 				}
+				int o = static_cast<int>(m_messageMapSize);
+				if (o > 0)
+				{
+					PrintDebug("Message Filemap SIZE: " + MString() + o);
+				}
+				PrintInfo(MString() + p_filemapSize);
 
-				PrintDebug("Message Filemap SIZE: " + MString() + m_messageMapSize);
-				m_nonAccessMemoryOffset = m_fileMapInfoStructured.non_accessmemoryOffset;
+				
+				//m_nonAccessMemoryOffset = m_fileMapInfoStructured.non_accessmemoryOffset;
 
-				//mSize = 2048; //denna ska hämtas
+				// INITIALIZE MESSAGE FILEMAP
+				bool t_messageMapStatus = true;
 				f_messageFilemap = CreateFileMapping(INVALID_HANDLE_VALUE,
 					NULL,
 					PAGE_READWRITE,
@@ -78,22 +89,35 @@ namespace DoremiEditor
 
 				f_messageMapData = MapViewOfFile(f_messageFilemap, FILE_MAP_ALL_ACCESS, 0, 0, 0);
 
-				if (f_messageFilemap == NULL) {
-					PrintWarning("Couldn't create filemap");
+				if (f_messageFilemap == NULL)
+				{
+					PrintWarning("Couldn't create message filemap");
+					t_messageMapStatus = false;
 				}
-				if (GetLastError() == ERROR_ALREADY_EXISTS) {
+				if (GetLastError() == ERROR_ALREADY_EXISTS) 
+				{
 					PrintInfo("Filemap exists, you get a handle to it!");
 					//m_isActive = true;
 
 				}
-				else {
+				else 
+				{
 					PrintInfo("Could not find Message Filemap! Creating new (Warning, not recommended)");
 					//m_isActive = true;
 				}
-
-				m_isActive = true;
-				PrintInfo("FileMapSize: " + MString() + m_infoMapSize + " " + MString() + m_fileMapInfoStructured.non_accessmemoryOffset);
-				PrintInfo("***** FILEMAP LOADED *****");
+				if (t_infoMapStatus && t_messageMapStatus)
+				{
+					m_isActive = true;
+					SetExportFileName();
+					PrintInfo("FileMapSize: " + MString() + m_infoMapSize + " " + MString() + m_fileMapInfoStructured.non_accessmemoryOffset);
+					PrintInfo("***** FILEMAP LOADED *****");
+				}
+				else
+				{
+					PrintWarning("Filemaps not loaded!");
+				}
+				
+				
 			}
 			catch (...)
 			{
@@ -161,37 +185,28 @@ namespace DoremiEditor
 				PrintError(MString() + errorMessage.c_str());
 			}
 		}
-		void Filemapping::SetInfoMapValues(size_t p_head, size_t p_tail, size_t p_safetyMemorySize, size_t p_messageFilemapSize)
+		void Filemapping::SetExportFileName(std::string p_fileName)
 		{
 			try
 			{
-				if (m_isActive)
+				if (p_fileName.length() > 1)
 				{
-					while (m_mutex.Lock(1000) == false) Sleep(10);
-					memcpy(&m_fileMapInfoStructured, (unsigned char*)f_infoMapData, sizeof(FilemapInfo));
-					if (p_head >= 0)
-						m_fileMapInfoStructured.head_ByteOffset = p_head;
-					if (p_tail >= 0)
-						m_fileMapInfoStructured.tail_ByteOffset = p_tail;
-					if (p_safetyMemorySize >= 0)
-						m_fileMapInfoStructured.non_accessmemoryOffset = p_safetyMemorySize;
-					m_nonAccessMemoryOffset = p_safetyMemorySize;
-					if (p_messageFilemapSize > 0)
-						m_fileMapInfoStructured.messageFilemap_Size = p_messageFilemapSize;
-					m_messageMapSize = p_messageFilemapSize;
-					memcpy((unsigned char*)f_infoMapData, &m_fileMapInfoStructured, sizeof(FilemapInfo));
-					m_mutex.Unlock();
+					size_t t_fileNameLength = p_fileName.length();
+					m_outFileName = p_fileName;
+					strcpy(m_fileMapInfoStructured.outFileName, p_fileName.c_str());
+					m_fileMapInfoStructured.outFileName[t_fileNameLength] = 0;
 				}
 				else
 				{
-					m_fileMapInfoStructured.head_ByteOffset = p_head;
-					m_fileMapInfoStructured.tail_ByteOffset = p_tail;
-					m_fileMapInfoStructured.non_accessmemoryOffset = p_safetyMemorySize;
-					m_fileMapInfoStructured.messageFilemap_Size = p_messageFilemapSize;
-					m_nonAccessMemoryOffset = p_safetyMemorySize;
-					m_messageMapSize = p_messageFilemapSize;
+					size_t t_fileNameLength = m_outFileName.length();
+					strcpy(m_fileMapInfoStructured.outFileName, m_outFileName.c_str());
+					m_fileMapInfoStructured.outFileName[t_fileNameLength] = 0;
+
 				}
 				
+				PrintInfo(MString(m_fileMapInfoStructured.outFileName));
+				
+				SetInfoMapValues();
 				
 			}
 			catch (...)
@@ -200,14 +215,88 @@ namespace DoremiEditor
 				PrintError(MString() + errorMessage.c_str());
 			}
 		}
+		void Filemapping::SetInfoMapValues(int p_head, int p_tail, int p_safetyMemorySize, int p_messageFilemapSize, std::string p_fileName)
+		{
+			try
+			{
+					//memcpy(&m_fileMapInfoStructured, (unsigned char*)f_infoMapData, sizeof(FilemapInfo));
+					if (p_head >= 0)
+					{
+						m_fileMapInfoStructured.head_ByteOffset = static_cast<size_t>(p_head);
+						m_localHead = static_cast<size_t>(p_head);
+					}
+					else
+					{
+						m_fileMapInfoStructured.head_ByteOffset = m_localHead;
+					}
+						
+					if (p_tail >= 0)
+					{
+						m_fileMapInfoStructured.tail_ByteOffset = static_cast<size_t>(p_tail);
+						m_localTail = static_cast<size_t>(p_tail);
+					}
+					else
+					{
+						m_fileMapInfoStructured.tail_ByteOffset = m_localTail;
+					}
+						
+					if (p_safetyMemorySize >= 0)
+					{
+						m_fileMapInfoStructured.non_accessmemoryOffset = static_cast<size_t>(p_safetyMemorySize);
+						m_nonAccessMemoryOffset = static_cast<size_t>(p_safetyMemorySize);
+					}
+					else
+					{
+						m_fileMapInfoStructured.non_accessmemoryOffset = m_nonAccessMemoryOffset;
+					}
+					if (p_messageFilemapSize >= 0)
+					{
+						m_fileMapInfoStructured.messageFilemap_Size = static_cast<size_t>(p_messageFilemapSize);
+						m_messageMapSize = static_cast<size_t>(p_messageFilemapSize);
+					}
+					else
+					{
+						m_fileMapInfoStructured.messageFilemap_Size = m_messageMapSize;
+					}
+					
+					//m_fileMapInfoStructured.
+					
+					if (m_isActive)
+					{
+						while (m_mutex.Lock(1000) == false) Sleep(10);
+						memcpy((unsigned char*)f_infoMapData, &m_fileMapInfoStructured, sizeof(FilemapInfo));
+						m_mutex.Unlock();
+					}
+
+					/*m_fileMapInfoStructured.head_ByteOffset = p_head;
+					m_fileMapInfoStructured.tail_ByteOffset = p_tail;
+					m_fileMapInfoStructured.non_accessmemoryOffset = p_safetyMemorySize;
+					m_fileMapInfoStructured.messageFilemap_Size = p_messageFilemapSize;*/
+					//m_nonAccessMemoryOffset = p_safetyMemorySize;
+					//m_messageMapSize = p_messageFilemapSize;
+			}
+			catch (...)
+			{
+				const std::string errorMessage = std::string("Catch: " + std::string(__FUNCTION__));
+				PrintError(MString() + errorMessage.c_str());
+			}
+		}
+
 		void Filemapping::GetInfoMapValues()
 		{
 			try
 			{
 				while (m_mutex.Lock(1000) == false) Sleep(10);
 				memcpy(&m_fileMapInfoStructured, (unsigned char*)f_infoMapData, sizeof(FilemapInfo)); //får inget värde!!!!!!! default värdet är fortfarande kvar
-				m_messageMapSize = m_fileMapInfoStructured.messageFilemap_Size;
-				m_nonAccessMemoryOffset = m_fileMapInfoStructured.non_accessmemoryOffset;
+				if (m_fileMapInfoStructured.messageFilemap_Size != 0)
+				{
+					m_messageMapSize = m_fileMapInfoStructured.messageFilemap_Size;
+				}
+				if (m_fileMapInfoStructured.non_accessmemoryOffset != 0)
+				{
+					m_nonAccessMemoryOffset = m_fileMapInfoStructured.non_accessmemoryOffset;
+				}
+				
 				m_localHead = m_fileMapInfoStructured.head_ByteOffset;
 				m_localTail = m_fileMapInfoStructured.tail_ByteOffset;
 				m_mutex.Unlock();
@@ -220,23 +309,30 @@ namespace DoremiEditor
 				PrintError(MString() + errorMessage.c_str());
 			}
 		}
-		void Filemapping::PrintFilemapInfo(bool p_isPostMessage)
+		void Filemapping::PrintFilemapInfo(bool p_isPostMessage, bool p_onlyFileName)
 		{
 			try
 			{
-				std::string str;
-				if (p_isPostMessage)
+				if (!p_onlyFileName)
 				{
-					str = "POST";
+					std::string str;
+					if (p_isPostMessage)
+					{
+						str = "POST";
+					}
+					else
+					{
+						str = "PRE";
+					}
+					PrintDebug("*** ! Infovalues " + MString(str.c_str()) + " message(HEAD, TAIL, NAM, SIZE): " +
+						MString() + m_fileMapInfoStructured.head_ByteOffset + " " + MString() + m_fileMapInfoStructured.tail_ByteOffset + " " +
+						MString() + m_fileMapInfoStructured.non_accessmemoryOffset + " " + MString() + m_fileMapInfoStructured.messageFilemap_Size);
 				}
 				else
 				{
-					str = "PRE";
+					// nothing
 				}
-				PrintDebug("*** ! Infovalues " + MString(str.c_str()) + " message(HEAD, TAIL, NAM, SIZE): " +
-					MString() + m_fileMapInfoStructured.head_ByteOffset + " " + MString() + m_fileMapInfoStructured.tail_ByteOffset + " " +
-					MString() + m_fileMapInfoStructured.non_accessmemoryOffset + " " + MString() + m_fileMapInfoStructured.messageFilemap_Size);
-
+				PrintDebug("*** ! Export File Name " + MString(m_outFileName.c_str()) + ".drm");
 				return;
 			}
 			catch (...)

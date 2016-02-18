@@ -6,6 +6,8 @@
 #include "CmdFileMapToggle.hpp"
 #include "CmdLoadScene.hpp"
 #include "CmdUnloadScene.hpp"
+#include "CmdResetMessages.hpp"
+#include "CmdSetFileName.hpp"
 #include "Filemapping.hpp"
 #include <iostream>
 
@@ -37,6 +39,8 @@ EXPORT MStatus initializePlugin(MObject obj)
 		myPlugin.registerCommand("drmToggleFilemaps", DoremiEditor::Plugin::Commands::CmdFileMapToggle::creator);
 		myPlugin.registerCommand("drmLoadScene", DoremiEditor::Plugin::Commands::CmdLoadScene::creator);
 		myPlugin.registerCommand("drmUnloadScene", DoremiEditor::Plugin::Commands::CmdUnloadScene::creator);
+		myPlugin.registerCommand("drmResetMessages", DoremiEditor::Plugin::Commands::CmdResetMessages::creator);
+		myPlugin.registerCommand("drmSetFileName", DoremiEditor::Plugin::Commands::CmdSetFileName::creator, DoremiEditor::Plugin::Commands::CmdSetFileName::nameSyntax);
 		//nhandle->TestFunction();
 	}
 	catch (...)
@@ -57,7 +61,11 @@ EXPORT MStatus uninitializePlugin(MObject obj)
 	DoremiEditor::Plugin::ApplicationContext::Shutdown();
 	// if any resources have been allocated, release and free here before
 	// returning...
-	plugin.deregisterCommand("drmTest");
+	plugin.deregisterCommand("drmToggleFilemaps");
+	plugin.deregisterCommand("drmLoadScene");
+	plugin.deregisterCommand("drmUnloadScene");
+	plugin.deregisterCommand("drmResetMessages");
+	plugin.deregisterCommand("drmSetFileName");
 	MGlobal::displayInfo("Maya plugin unloaded!");
 
 	return MS::kSuccess;

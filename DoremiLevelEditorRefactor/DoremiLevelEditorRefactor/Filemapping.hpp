@@ -24,22 +24,23 @@ namespace DoremiEditor
 			LPVOID f_messageMapData;
 			HANDLE f_infoFilemap;
 			LPVOID f_infoMapData;
-
+			
 			bool m_isActive;
 		public: 
 			MessageBuilder* m_messageBuilder = nullptr;
-			
+			std::string m_outFileName;
 
 			Filemapping();
 			~Filemapping();
 
 			bool GetFilemapStatus();
 
-			void CreateFilemaps(size_t p_filemapSize = 0);
+			void CreateFilemaps(int p_filemapSize = -1);
 			void CloseFilemaps();
-			void SetInfoMapValues(size_t p_head = 0, size_t p_tail = 0, size_t p_safetyMemorySize = 256, size_t p_messageFilemapSize = 0);
+			void SetInfoMapValues(int p_head = -1, int p_tail = -1, int p_safetyMemorySize = -1, int p_messageFilemapSize = -1, std::string p_fileName = "");
 			void GetInfoMapValues();
-			void PrintFilemapInfo(bool p_isPostMessage);
+			void SetExportFileName(std::string p_fileName = "");
+			void PrintFilemapInfo(bool p_isPostMessage, bool p_onlyFileName = false);
 
 			MessageHeader CreateHeaderTransform(MessageInfo& p_messageInfo);
 			MessageHeader CreateHeaderMesh(MessageInfo& p_messageInfo);
