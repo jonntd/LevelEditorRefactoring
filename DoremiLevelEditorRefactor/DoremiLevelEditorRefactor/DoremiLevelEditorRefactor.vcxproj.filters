@@ -111,4 +111,9 @@
       <Filter>Source Files\Commands</Filter>
     </ClCompile>
   </ItemGroup>
+  <ItemGroup>
+    <None Include="LevelEditorGUI.py">
+      <Filter>Resource Files</Filter>
+    </None>
+  </ItemGroup>
 </Project>
