@@ -8,6 +8,7 @@
 #include "CmdUnloadScene.hpp"
 #include "CmdResetMessages.hpp"
 #include "CmdSetFileName.hpp"
+#include "CmdSetDebugMode.hpp"
 #include "Filemapping.hpp"
 #include <iostream>
 
@@ -27,21 +28,20 @@ EXPORT MStatus initializePlugin(MObject obj)
 			CHECK_MSTATUS(res);
 		}
 
-		MGlobal::displayInfo("Maya plugin loaded! ");
+		MGlobal::displayInfo("Doremi Editor Maya plugin loaded! ");
 		// if res == kSuccess then the plugin has been loaded,
 		// otherwise is has not.
 
 		
 		DoremiEditor::Plugin::ApplicationContext::GetInstance().InitializeClasses();
-		//DoremiEditor::Plugin::ApplicationContext::GetInstance().GetFilemapping()->CreateFilemaps();
-		//DoremiEditor::Plugin::ApplicationContext::GetInstance().GetCallbackHandler()->LoadScene();
-		
+
 		myPlugin.registerCommand("drmToggleFilemaps", DoremiEditor::Plugin::Commands::CmdFileMapToggle::creator, DoremiEditor::Plugin::Commands::CmdFileMapToggle::stateSyntax);
 		myPlugin.registerCommand("drmLoadScene", DoremiEditor::Plugin::Commands::CmdLoadScene::creator);
 		myPlugin.registerCommand("drmUnloadScene", DoremiEditor::Plugin::Commands::CmdUnloadScene::creator);
 		myPlugin.registerCommand("drmResetMessages", DoremiEditor::Plugin::Commands::CmdResetMessages::creator);
 		myPlugin.registerCommand("drmSetFileName", DoremiEditor::Plugin::Commands::CmdSetFileName::creator, DoremiEditor::Plugin::Commands::CmdSetFileName::nameSyntax);
-		//nhandle->TestFunction();
+		myPlugin.registerCommand("drmSetDebug", DoremiEditor::Plugin::Commands::CmdSetDebugMode::creator, DoremiEditor::Plugin::Commands::CmdSetDebugMode::stateSyntax);
+
 	}
 	catch (...)
 	{
@@ -66,7 +66,8 @@ EXPORT MStatus uninitializePlugin(MObject obj)
 	plugin.deregisterCommand("drmUnloadScene");
 	plugin.deregisterCommand("drmResetMessages");
 	plugin.deregisterCommand("drmSetFileName");
-	MGlobal::displayInfo("Maya plugin unloaded!");
+	plugin.deregisterCommand("drmSetDebug");
+	MGlobal::displayInfo("Doremi Editor Maya plugin unloaded!");
 
 	return MS::kSuccess;
 }

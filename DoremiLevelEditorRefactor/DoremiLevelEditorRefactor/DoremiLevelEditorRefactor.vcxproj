@@ -163,6 +163,7 @@
     <ClInclude Include="CmdFileMapToggle.hpp" />
     <ClInclude Include="CmdLoadScene.hpp" />
     <ClInclude Include="CmdResetMessages.hpp" />
+    <ClInclude Include="CmdSetDebugMode.hpp" />
     <ClInclude Include="CmdSetFileName.hpp" />
     <ClInclude Include="CmdUnloadScene.hpp" />
     <ClInclude Include="Filemapping.hpp" />
@@ -181,6 +182,7 @@
     <ClCompile Include="CmdFileMapToggle.cpp" />
     <ClCompile Include="CmdLoadScene.cpp" />
     <ClCompile Include="CmdResetMessages.cpp" />
+    <ClCompile Include="CmdSetDebugMode.cpp" />
     <ClCompile Include="CmdSetFileName.cpp" />
     <ClCompile Include="CmdUnloadScene.cpp" />
     <ClCompile Include="Filemapping.cpp" />

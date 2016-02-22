@@ -84,8 +84,20 @@ class UIController(QObject):
 		ui.runFilemapButton.clicked.connect(self.runFilemaps)
 		ui.stopFilemapsButton.clicked.connect(self.stopFilemaps)
 		ui.acceptFileNameButton.clicked.connect(self.getFileName)
+		ui.checkBoxDebug.stateChanged.connect(self.setDebugStatus)
 
-		# disabled options
+		ui.checkBoxDebug.setEnabled(False)
+		ui.unloadPluginButton.setEnabled(False)
+		ui.loadSceneButton.setEnabled(False)
+		ui.unloadSceneButton.setEnabled(False)
+		ui.resetMsgButton.setEnabled(False)
+		ui.actionPluginLocation.setEnabled(False)
+		ui.runFilemapButton.setEnabled(False)
+		ui.stopFilemapsButton.setEnabled(False)
+		ui.acceptFileNameButton.setEnabled(False)
+	
+
+		# disabled options maybe to be added later
 		ui.duplicateAttButton.setEnabled(False)
 		ui.pasteAttButton.setEnabled(False)
 		ui.resetAttButton.setEnabled(False)
@@ -99,7 +111,7 @@ class UIController(QObject):
 		ui.textBoxTransforms.setEnabled(False)
 		ui.textBoxMaterials.setEnabled(False)
 		ui.textBoxSelected.setEnabled(False)
-
+		
 
 
 		self.ui = ui
@@ -122,6 +134,15 @@ class UIController(QObject):
 	def runPlugin(self):
 		if self.mainObject.pathIsSet == 1:
 			pm.loadPlugin(self.mainObject.pluginPath, name="DoremiEditor")
+			self.ui.checkBoxDebug.setEnabled(True)
+			self.ui.unloadPluginButton.setEnabled(True)
+			self.ui.loadSceneButton.setEnabled(True)
+			self.ui.unloadSceneButton.setEnabled(True)
+			self.ui.resetMsgButton.setEnabled(True)
+			self.ui.actionPluginLocation.setEnabled(True)
+			self.ui.runFilemapButton.setEnabled(True)
+			self.ui.stopFilemapsButton.setEnabled(True)
+			self.ui.acceptFileNameButton.setEnabled(True)
 			self.isRunning = 1
 		else:
 			print 'Plugin file path not set!'
@@ -129,6 +150,17 @@ class UIController(QObject):
 		if self.isRunning == 1:
 			pm.unloadPlugin('DoremiEditor')
 			self.isRunning = 0
+			self.ui.checkBoxDebug.setCheckState(Qt.Unchecked)
+			self.ui.checkBoxDebug.setEnabled(False)
+			self.ui.unloadPluginButton.setEnabled(False)
+			self.ui.loadSceneButton.setEnabled(False)
+			self.ui.unloadSceneButton.setEnabled(False)
+			self.ui.resetMsgButton.setEnabled(False)
+			self.ui.actionPluginLocation.setEnabled(False)
+			self.ui.runFilemapButton.setEnabled(False)
+			self.ui.stopFilemapsButton.setEnabled(False)
+			self.ui.acceptFileNameButton.setEnabled(False)
+
 		else:
 			print 'Plugin is not running!'
 	def loadScene(self):
@@ -156,6 +188,14 @@ class UIController(QObject):
 			mel.eval('drmSetFileName -n '+ fileNameString)
 		else:
 			print '[Editor Warning] Filename not set!'
+	def setDebugStatus(self):
+		if self.isRunning == 1:  
+			if self.ui.checkBoxDebug.isChecked():
+				print 'Debug ON'
+				mel.eval('drmSetDebug -s true')
+			else:
+				print 'Debug OFF'
+				mel.eval('drmSetDebug -s false')
 
 
 class MainObject(object):
