@@ -81,6 +81,27 @@ class UIController(QObject):
 		ui.unloadSceneButton.clicked.connect(self.unloadScene)
 		ui.resetMsgButton.clicked.connect(self.resetMessages)
 		ui.actionPluginLocation.triggered.connect(self.setPluginPath)
+		ui.runFilemapButton.clicked.connect(self.runFilemaps)
+		ui.stopFilemapsButton.clicked.connect(self.stopFilemaps)
+		ui.acceptFileNameButton.clicked.connect(self.getFileName)
+
+		# disabled options
+		ui.duplicateAttButton.setEnabled(False)
+		ui.pasteAttButton.setEnabled(False)
+		ui.resetAttButton.setEnabled(False)
+		ui.reloadShapeButton.setEnabled(False)
+		ui.updateShapeButton.setEnabled(False)
+
+		ui.reloadTransButton.setEnabled(False)
+		ui.updateTransButton.setEnabled(False)
+		ui.textBoxMeshes.setEnabled(False)
+		ui.textBoxLights.setEnabled(False)
+		ui.textBoxTransforms.setEnabled(False)
+		ui.textBoxMaterials.setEnabled(False)
+		ui.textBoxSelected.setEnabled(False)
+
+
+
 		self.ui = ui
 		self.isRunning = self.mainObject.isPluginLoaded()
 		#self.ui.setWindowFlags(PySide.QtCore.Qt.WindowStaysOnTop)
@@ -106,7 +127,7 @@ class UIController(QObject):
 			print 'Plugin file path not set!'
 	def unloadPlugin(self):
 		if self.isRunning == 1:
-			pm.unloadPlugin('DoremiLevelEditorRefactor')
+			pm.unloadPlugin('DoremiEditor')
 			self.isRunning = 0
 		else:
 			print 'Plugin is not running!'
@@ -125,6 +146,16 @@ class UIController(QObject):
 			mel.eval('drmResetMessages')
 		else:
 			print 'Plugin not loaded!'
+	def runFilemaps(self):
+		mel.eval('drmToggleFilemaps -s true')
+	def stopFilemaps(self):
+		mel.eval('drmToggleFilemaps -s false')
+	def getFileName(self):
+		fileNameString = self.ui.textBoxFileName.text()
+		if len(fileNameString)>0:
+			mel.eval('drmSetFileName -n '+ fileNameString)
+		else:
+			print '[Editor Warning] Filename not set!'
 
 
 class MainObject(object):

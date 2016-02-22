@@ -75,14 +75,14 @@
          </widget>
         </item>
         <item>
-         <widget class="QPushButton" name="runButton">
+         <widget class="QPushButton" name="runFilemapButton">
           <property name="text">
            <string>Run Filemaps</string>
           </property>
          </widget>
         </item>
         <item>
-         <widget class="QPushButton" name="stopButton">
+         <widget class="QPushButton" name="stopFilemapsButton">
           <property name="text">
            <string>Stop Filemaps</string>
           </property>

@@ -8,7 +8,7 @@ namespace DoremiEditor
 	{
 		namespace Commands
 		{
-			class MessageHandler;
+			class Filemapping;
 			class CmdFileMapToggle : public MPxCommand
 			{
 			public:
@@ -16,6 +16,7 @@ namespace DoremiEditor
 				virtual ~CmdFileMapToggle();
 				MStatus doIt(const MArgList& args);
 				static void* creator();
+				static MSyntax stateSyntax();
 			};
 
 		}
