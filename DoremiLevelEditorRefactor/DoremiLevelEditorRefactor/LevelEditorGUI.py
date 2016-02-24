@@ -1,4 +1,4 @@
-from copy import *
+﻿from copy import *
 import time
 import pymel.core as pm
 import pymel.core.datatypes as dtype
@@ -91,7 +91,7 @@ class UIController(QObject):
 		ui.loadSceneButton.setEnabled(False)
 		ui.unloadSceneButton.setEnabled(False)
 		ui.resetMsgButton.setEnabled(False)
-		ui.actionPluginLocation.setEnabled(False)
+		#ui.actionPluginLocation.setEnabled(False)
 		ui.runFilemapButton.setEnabled(False)
 		ui.stopFilemapsButton.setEnabled(False)
 		ui.acceptFileNameButton.setEnabled(False)
