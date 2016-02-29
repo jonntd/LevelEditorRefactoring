@@ -322,38 +322,42 @@ namespace DoremiEditor
 						//
 						// Get Materials
 						//
-						std::string t_materialName;
+						std::string t_materialName = "";
 						MObjectArray t_connectedShaders;
 						MIntArray t_shaderIDArray;
 						t_mesh.getConnectedShaders(0, t_connectedShaders, t_shaderIDArray);
 						size_t t_connectionID;
-						for (size_t i = 0; i < t_connectedShaders.length(); ++i)
+						if (t_connectedShaders.length() > static_cast<size_t>(0))
 						{
-							MFnDependencyNode t_shaderGroupTemp(t_connectedShaders[i],&result);
-							MPlug t_plug_2 = t_shaderGroupTemp.findPlug("surfaceShader", &result);
-							if (result)
+							for (size_t i = 0; i < t_connectedShaders.length(); ++i)
 							{
-								t_connectionID = i;
-								break;
+								MFnDependencyNode t_shaderGroupTemp(t_connectedShaders[i], &result);
+								MPlug t_plug_2 = t_shaderGroupTemp.findPlug("surfaceShader", &result);
+								if (result)
+								{
+									t_connectionID = i;
+									break;
+								}
+							}
+							MFnDependencyNode t_shaderGroup(t_connectedShaders[t_connectionID], &result);
+							MPlug t_plug = t_shaderGroup.findPlug("surfaceShader");
+							MPlugArray t_connections;
+							t_plug.connectedTo(t_connections, true, false);
+							int t_shaderID = -1;
+							for (size_t i = 0; i < t_connections.length(); ++i)
+							{
+								if (t_connections[i].node().hasFn(MFn::kLambert))
+								{
+									t_shaderID = i;
+								}
+							}
+							if (t_shaderID >= 0)
+							{
+								MFnDependencyNode t_material(t_connections[t_shaderID].node());
+								t_materialName = t_material.name().asChar();
 							}
 						}
-						MFnDependencyNode t_shaderGroup(t_connectedShaders[t_connectionID], &result);
-						MPlug t_plug = t_shaderGroup.findPlug("surfaceShader");
-						MPlugArray t_connections;
-						t_plug.connectedTo(t_connections, true, false);
-						int t_shaderID = -1;
-						for (size_t i = 0; i < t_connections.length(); ++i)
-						{
-							if (t_connections[i].node().hasFn(MFn::kLambert))
-							{
-								t_shaderID = i;
-							}
-						}
-						if (t_shaderID >= 0)
-						{
-							MFnDependencyNode t_material(t_connections[t_shaderID].node());
-							t_materialName = t_material.name().asChar();
-						}
+						
 						//
 						// Get Parent Names
 						//

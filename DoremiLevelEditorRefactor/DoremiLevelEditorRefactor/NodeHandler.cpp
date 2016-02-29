@@ -113,16 +113,17 @@ namespace DoremiEditor
 		}
 		void NodeHandler::PrintVectorInfo()
 		{
-			int totalCount, transformCount, meshCount, camCount, lightCount, materialCount;
+			size_t totalCount, transformCount, meshCount, camCount, lightCount, materialCount,instanceCount;
 			transformCount = m_transformVector.size();
 			meshCount = m_meshVector.size();
 			camCount = m_cameraVector.size();
 			lightCount = m_lightVector.size();
 			materialCount = m_materialVector.size();
+			instanceCount = m_instancedMeshes.size();
 			totalCount = transformCount + meshCount + camCount + lightCount + materialCount;
 			PrintInfo("NODE COUNTS");
 			PrintInfo("Transforms: " + MString() + transformCount);
-			PrintInfo("Meshes: " + MString() + meshCount);
+			PrintInfo("Meshes (Instances): " + MString() + meshCount);
 			PrintInfo("Cameras: " + MString() + camCount);
 			PrintInfo("Lights: " + MString() + lightCount);
 			PrintInfo("Materials: " + MString() + materialCount);
@@ -190,58 +191,47 @@ namespace DoremiEditor
 				PrintError(MString() + errorMessage.c_str());
 			}
 		}
-		void NodeHandler::AddMeshNode(const MFnMesh& p_mesh)
+		void NodeHandler::AddMeshNode(const MFnMesh& p_mesh, const bool p_isInstance)
 		{
 			try
 			{
-				std::string meshName = p_mesh.name().asChar();
-				std::vector<std::string> parentNames;
-				MeshInfo meshInfo;
-				meshInfo.nodeName = meshName;
-				if (p_mesh.parentCount() > 1)
+				if (p_mesh.numVertices() > 0)
 				{
-					for (int i = 0; i < p_mesh.parentCount(); ++i)
+					std::string meshName = p_mesh.name().asChar();
+					std::vector<std::string> parentNames;
+					MeshInfo meshInfo;
+					meshInfo.nodeName = meshName;
+					if (p_mesh.parentCount() > 1)
 					{
-						if(p_mesh.parent(i).hasFn(MFn::kTransform))
+						for (int i = 0; i < p_mesh.parentCount(); ++i)
 						{
-							MFnTransform t_parent(p_mesh.parent(i));
-							parentNames.push_back(t_parent.name().asChar());
-							meshInfo.transformCount++;
+							if (p_mesh.parent(i).hasFn(MFn::kTransform))
+							{
+								MFnTransform t_parent(p_mesh.parent(i));
+								parentNames.push_back(t_parent.name().asChar());
+								meshInfo.transformCount++;
+							}
 						}
+						meshInfo.transformName = parentNames;
 					}
-					meshInfo.transformName = parentNames;
-				}
-				else if (p_mesh.parent(0).hasFn(MFn::kTransform)) 
-				{
-					MFnTransform t_transform(p_mesh.parent(0));
-					parentNames.push_back(t_transform.name().asChar());
-					meshInfo.transformName = parentNames;
-					meshInfo.transformCount = 1;
-				}
-				else
-				{
-					// Do nothing if no transform is available. Can be changed to add an empty string instead.
-				}
-				if (m_meshVector.size() == 0)
-				{
-					m_meshVector.push_back(meshInfo);
-					m_messageHandler->AddMessage(meshInfo.nodeName, NodeType::nMesh, MessageType::msgAdded);
-					//m_messageBuilder->GetMeshData(meshName);
-					PrintDebug("Added mesh ( " + MString(meshName.c_str()) + " ) with parent ( " + MString(meshInfo.transformName.at(0).c_str()) + " )");
-				}
-				else
-				{
-					bool nodeExists = false;
-					for (std::vector<MeshInfo>::size_type i = 0; i < m_meshVector.size(); ++i)
+					else if (p_mesh.parent(0).hasFn(MFn::kTransform))
 					{
-						if(strcmp(meshName.c_str(), m_meshVector.at(i).nodeName.c_str()) == 0)
+						MFnTransform t_transform(p_mesh.parent(0));
+						parentNames.push_back(t_transform.name().asChar());
+						meshInfo.transformName = parentNames;
+						meshInfo.transformCount = 1;
+					}
+					else
+					{
+						// Do nothing if no transform is available. Can be changed to add an empty string instead.
+					}
+					if (m_meshVector.size() == 0)
+					{
+						if (p_isInstance)
 						{
-							nodeExists = true;
-							break;
+							m_instancedMeshes.push_back(meshName);
+							PrintDebug("Added instanced mesh ( " + MString(meshName.c_str()) + " ) with parent ( " + MString(meshInfo.transformName.at(0).c_str()) + " )");
 						}
-					}
-					if (!nodeExists)
-					{
 						m_meshVector.push_back(meshInfo);
 						m_messageHandler->AddMessage(meshInfo.nodeName, NodeType::nMesh, MessageType::msgAdded);
 						//m_messageBuilder->GetMeshData(meshName);
@@ -249,10 +239,39 @@ namespace DoremiEditor
 					}
 					else
 					{
-						PrintDebug("Mesh " + MString(meshName.c_str()) + " already exists!");
+						bool nodeExists = false;
+						for (std::vector<MeshInfo>::size_type i = 0; i < m_meshVector.size(); ++i)
+						{
+							if (strcmp(meshName.c_str(), m_meshVector.at(i).nodeName.c_str()) == 0)
+							{
+								nodeExists = true;
+								break;
+							}
+						}
+						if (!nodeExists)
+						{
+							if (p_isInstance)
+							{
+								m_instancedMeshes.push_back(meshName);
+								PrintDebug("Added instanced mesh ( " + MString(meshName.c_str()) + " ) with parent ( " + MString(meshInfo.transformName.at(0).c_str()) + " )");
+							}
+							m_meshVector.push_back(meshInfo);
+							m_messageHandler->AddMessage(meshInfo.nodeName, NodeType::nMesh, MessageType::msgAdded);
+							//m_messageBuilder->GetMeshData(meshName);
+							PrintDebug("Added mesh ( " + MString(meshName.c_str()) + " ) with parent ( " + MString(meshInfo.transformName.at(0).c_str()) + " )");
+						}
+						else
+						{
+							PrintDebug("Mesh " + MString(meshName.c_str()) + " already exists!");
+						}
 					}
+					PrintVectorInfo();
 				}
-				PrintVectorInfo();
+				else
+				{
+					PrintWarning("Tried to add submesh component: " + p_mesh.name());
+				}
+				
 			}
 			catch (...)
 			{

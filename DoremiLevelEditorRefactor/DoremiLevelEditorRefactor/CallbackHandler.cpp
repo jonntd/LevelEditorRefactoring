@@ -88,6 +88,42 @@ namespace DoremiEditor
 							MObject t_child(t_trans.child(i));
 							if (t_child.hasFn(MFn::kMesh))
 							{
+								MFnMesh t_childMesh(t_child, &result);
+								if (result)
+								{
+									if (t_childMesh.isInstanced(true, &result))
+									{
+										std::string t_meshName = t_childMesh.name().asChar();
+										bool t_isAdded = false;
+										for (size_t o = 0; o < s_nodeHandler->m_instancedMeshes.size(); ++o)
+										{
+											if (strcmp(s_nodeHandler->m_instancedMeshes.at(o).c_str(), t_meshName.c_str()) == 0)
+											{
+												PrintDebug("FOUND INSTANCED MESH");
+												t_isAdded = true;
+												break;
+											}
+										}
+										if (!t_isAdded)
+										{
+											for (size_t i = 0; i < t_childMesh.parentCount(); ++i)
+											{
+												if (t_childMesh.parent(0).hasFn(MFn::kTransform))
+												{
+													MObject t_childParentTransformObject(t_childMesh.parent(i));
+													MFnTransform t_childParentTransform(t_childParentTransformObject, &result);
+													if (result && t_childParentTransform.name().asChar() != t_trans.name().asChar())
+													{
+														AddTransform(t_childParentTransformObject);
+														PrintDebug("Added Instanced Transform (" + t_childParentTransform.name() + ") before Mesh: " + t_childMesh.name());
+													}
+
+												}
+											}
+										}
+									
+									}
+								}
 								AddMesh(t_child, false);
 							}
 							else if (t_child.hasFn(MFn::kLight))

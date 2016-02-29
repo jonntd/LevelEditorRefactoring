@@ -32,6 +32,7 @@ namespace DoremiEditor
 			std::vector<CameraInfo>		m_cameraVector;
 			std::vector<LightInfo>		m_lightVector;
 			std::vector<MaterialInfo>	m_materialVector;
+			std::vector<std::string>	m_instancedMeshes;
 
 
 			NodeHandler();
@@ -40,7 +41,7 @@ namespace DoremiEditor
 			void Initialize();
 			void AddCustomAttributesTransform( MFnTransform& p_transform);
 			void AddTransformNode(const MFnTransform& p_transform);
-			void AddMeshNode(const MFnMesh& p_mesh);
+			void AddMeshNode(const MFnMesh& p_mesh, const bool p_isInstance = false);
 			void AddCameraNode(const MFnCamera& p_camera);
 			void AddMaterialNode(const MFnDependencyNode& p_material);
 			void AddLightNode(const MFnLight& p_light);
